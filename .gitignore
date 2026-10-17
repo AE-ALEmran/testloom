@@ -1,0 +1,10 @@
+__pycache__/
+*.log
+*.py
+*.bat
+*.ps1
+data/
+extracted_logos/
+GEMINI.md
+.vscode/
+.idea/
