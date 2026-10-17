@@ -3,6 +3,12 @@
   <head>
     <script>
       (function() {
+        var isTestloom = window.location.pathname.indexOf('/testloom') === 0;
+        document.write('<base href="' + (isTestloom ? '/testloom/' : '/') + '">');
+      })();
+    </script>
+    <script>
+      (function() {
         var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
         if (!isLocal) return;
         var origFetch = window.fetch;
@@ -62,22 +68,22 @@
 
 
     <!-- Favicons (mobile browser tab + iOS/Android home-screen) -->
-    <link rel="icon" id="dynamic-favicon" href="/favicon.ico" />
-    <link id="dynamic-manifest" rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" id="dynamic-favicon" href="favicon.ico" />
+    <link id="dynamic-manifest" rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#1e40af" />
-    <link rel="apple-touch-icon" id="dynamic-apple-icon" href="/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" id="dynamic-apple-icon" href="apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="TestLoom" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/social.webp">
+    <meta property="og:image" content="social.webp">
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@TestLoom" />
-    <meta name="twitter:image" content="/social.webp">
+    <meta name="twitter:image" content="social.webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style id="cached-theme-vars">
@@ -179,8 +185,8 @@
   <meta name="twitter:title" content="TestLoom - Modern Exam Preparation">
   <meta property="og:description" content="TestLoom - Modern, fast, and scalable exam preparation platform with realistic mock tests, expert feedback, and progress tracking.">
   <meta name="twitter:description" content="TestLoom - Modern, fast, and scalable exam preparation platform with realistic mock tests, expert feedback, and progress tracking.">
-  <script type="module" crossorigin src="/assets/index-D9TqrYCw.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-C-33DhYT.css">
+  <script type="module" crossorigin src="assets/index-D9TqrYCw.js"></script>
+  <link rel="stylesheet" crossorigin href="assets/index-C-33DhYT.css">
 </head>
 
   <body>

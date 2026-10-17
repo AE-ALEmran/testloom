@@ -1,1 +1,1 @@
-const e="/assets/index-IYnegLzJ.ts";export{e as default};
+const e="assets/index-IYnegLzJ.ts";export{e as default};
