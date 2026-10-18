@@ -7,51 +7,9 @@
         document.write('<base href="' + (isTestloom ? '/testloom/' : '/') + '">');
       })();
     </script>
-    <script>
-      (function() {
-        var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        if (!isLocal) return;
-        var origFetch = window.fetch;
-        window.fetch = function(input, init) {
-          try {
-            var url = typeof input === "string" ? input : (input && input.url ? input.url : "");
-            if (url && url.indexOf("jwwklcjvwgypqfznzsaw.supabase.co") !== -1) {
-              var rewritten = url.replace("https://jwwklcjvwgypqfznzsaw.supabase.co", window.location.origin);
-              if (typeof input === "string") {
-                input = rewritten;
-              } else if (window.Request && input instanceof Request) {
-                input = new Request(rewritten, input);
-              }
-            }
-          } catch (e) {
-            console.warn("[LocalProxy] fetch rewrite error:", e);
-          }
-          return origFetch.call(this, input, init);
-        };
-        var origOpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-          if (typeof url === "string" && url.indexOf("jwwklcjvwgypqfznzsaw.supabase.co") !== -1) {
-            url = url.replace("https://jwwklcjvwgypqfznzsaw.supabase.co", window.location.origin);
-          }
-          return origOpen.apply(this, arguments);
-        };
-      })();
-    </script>
-    <script>
-      (function() {
-        try {
-          var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-          var p = window.location.pathname;
-          var isLoginPage = p === "/admin-login" || p === "/admin/login" || p === "/login";
-          if (window.location.search.indexOf("mock_admin=1") !== -1 || (isLocal && !isLoginPage && !localStorage.getItem("mock_admin_logged_out"))) {
-            if (!localStorage.getItem("mock_admin")) {
-              localStorage.setItem("mock_admin", "true");
-              localStorage.setItem("mock_admin_email", "emranuc52@gmail.com");
-            }
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <script src="client-mock-adapter.js"></script>
+    <link rel="modulepreload" href="assets/index-D9TqrYCw.js">
+    <link rel="preload" href="assets/index-C-33DhYT.css" as="style">
     <script>(function(){var m=location.pathname.match(/^\/r\/([A-Za-z0-9_-]{3,40})\/?$/);if(!m)return;var v;try{v=localStorage.getItem('lt_vid');if(!v){var a=new Uint8Array(16);crypto.getRandomValues(a);v=Array.from(a,function(b){return('0'+b.toString(16)).slice(-2)}).join('');localStorage.setItem('lt_vid',v)}}catch(e){}var q=new URLSearchParams(location.search);var o=new URLSearchParams();q.forEach(function(val,k){if(/^utm_[a-z]+$/.test(k))o.set(k,val)});if(v)o.set('v',v);if(document.referrer)o.set('ref',document.referrer.slice(0,300));location.replace('https://jwwklcjvwgypqfznzsaw.supabase.co/functions/v1/link-redirect/'+m[1]+'?'+o.toString());document.documentElement.style.display='none'})();</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
