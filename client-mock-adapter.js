@@ -8,6 +8,12 @@
   var isSubpath = window.location.pathname.indexOf('/testloom') === 0;
   var basePath = isSubpath ? '/testloom/' : '/';
 
+  // 1b. Intercept & prevent any Vite chunk/CSS preload failure from crashing the app
+  window.addEventListener('vite:preloadError', function(event) {
+    if (event && event.preventDefault) event.preventDefault();
+    console.warn('[TestLoom Preload Handled]:', event && event.payload);
+  });
+
   // 2. Auto-authenticate session for immediate access to Admin and Student views
   try {
     var p = window.location.pathname;
@@ -337,9 +343,12 @@
             }]));
           }
 
-          // Caching & Sanitize for full_mock_tests
-          if (tableName === 'full_mock_tests' && method === 'GET') {
-            var cacheKey = 'cache_mock_tests_' + search;
+          // Caching & Sanitize for all test modules (full mock, reading, listening, writing, speaking)
+          var isTestTable = (tableName === 'full_mock_tests' || tableName === 'reading_tests' || 
+                             tableName === 'listening_tests' || tableName === 'writing_tests' || 
+                             tableName === 'speaking_tests');
+          if (isTestTable && method === 'GET') {
+            var cacheKey = 'cache_' + tableName + '_' + search;
             if (MEM_CACHE[cacheKey]) {
               return Promise.resolve(makeJsonResponse(MEM_CACHE[cacheKey]));
             }
