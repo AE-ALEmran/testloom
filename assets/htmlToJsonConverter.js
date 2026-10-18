@@ -162,7 +162,7 @@ export function convertHtmlToReadingJson(doc, rawHtml) {
   });
 
   return {
-    schema: "puropuri.reading.v2",
+    schema: "testloom.reading.v2",
     version: 2,
     title: title,
     series: "cambridge",

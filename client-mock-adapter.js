@@ -3,7 +3,8 @@
  * Accelerates all pages, eliminates infinite loading spinners,
  * provides instant mock data for Supabase tables & Edge Functions,
  * speeds up Full Mock Tests by 200x via in-memory indexing,
- * and enables seamless Admin & Student login.
+ * enables seamless Admin & Student login,
+ * and gives Admin full capability to update, edit, create, and import test files.
  */
 (function() {
   var isSubpath = window.location.pathname.indexOf('/testloom') === 0;
@@ -24,7 +25,63 @@
     speaking_tests: {}
   };
 
-  // 3. Default Mock Branding
+  // 3. Local Persistence Helpers (localStorage)
+  function getLocalTable(tbl) {
+    try {
+      var s = localStorage.getItem('testloom_local_' + tbl);
+      return s ? JSON.parse(s) : [];
+    } catch(e) { return []; }
+  }
+
+  function setLocalTable(tbl, rows) {
+    try {
+      localStorage.setItem('testloom_local_' + tbl, JSON.stringify(rows));
+    } catch(e) {}
+  }
+
+  function getDeletedIds(tbl) {
+    try {
+      var s = localStorage.getItem('testloom_deleted_' + tbl);
+      return s ? JSON.parse(s) : [];
+    } catch(e) { return []; }
+  }
+
+  function addDeletedId(tbl, id) {
+    try {
+      var arr = getDeletedIds(tbl);
+      if (arr.indexOf(id) === -1) {
+        arr.push(id);
+        localStorage.setItem('testloom_deleted_' + tbl, JSON.stringify(arr));
+      }
+    } catch(e) {}
+  }
+
+  function uuidv4() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      try { return crypto.randomUUID(); } catch(e) {}
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  // 4. Default Mock IELTS Band Scores
+  var standardBandScores = [
+    { band: 9.0, min_score: 39 },
+    { band: 8.5, min_score: 37 },
+    { band: 8.0, min_score: 35 },
+    { band: 7.5, min_score: 33 },
+    { band: 7.0, min_score: 30 },
+    { band: 6.5, min_score: 27 },
+    { band: 6.0, min_score: 23 },
+    { band: 5.5, min_score: 19 },
+    { band: 5.0, min_score: 15 },
+    { band: 4.5, min_score: 13 },
+    { band: 4.0, min_score: 10 }
+  ];
+
+  // 5. Default Mock Branding
   var mockBranding = {
     id: "brand-default",
     platform_name: "TestLoom",
@@ -36,7 +93,7 @@
     logo_width: 126,
     mobile_logo_height: 28,
     mobile_logo_width: 98,
-    whatsapp_link: "https://wa.me/8801888888888",
+    whatsapp_link: null,
     messenger_link: null,
     active_theme: "zootopia_blue",
     theme_vars: {
@@ -52,7 +109,7 @@
     updated_at: "2026-10-18T00:00:00Z"
   };
 
-  // 4. Default Site Settings for 0ms Auth & Theme Loading
+  // 6. Default Site Settings for 0ms Auth & Theme Loading
   var mockSiteSettings = [
     { key: "auth_template_id", value: "split-cards" },
     { key: "auth_template_overrides", value: JSON.stringify({
@@ -102,7 +159,7 @@
     { key: "instruction_video_writing", value: "https://pub-81503b26a8544c6ca5a7fa018dc8e03e.r2.dev/writing.mp4" }
   ];
 
-  // 5. Default Free Trial Tests (17 tests)
+  // 7. Default Free Trial Tests (17 tests)
   var mockFreeTrialTests = [
     { id: "f14b8c68-7071-473d-8707-949d23900fcf", test_id: "c3454b1e-6a91-44e7-a4b7-87cca312c1dd", test_type: "full_mock", display_order: 0 },
     { id: "c4d1a331-6653-499d-986c-c8b108188da2", test_id: "f3b1ae22-c7c6-4da9-9500-506666b6f9d8", test_type: "full_mock", display_order: 1 },
@@ -123,7 +180,7 @@
     { id: "b7d4f0a9-b914-4681-9ec3-7d26cc38b9b3", test_id: "2366cce5-2220-4ab9-86ef-bb9b98a08ab1", test_type: "speaking", display_order: 1 }
   ];
 
-  // 6. Default Mock User Subscription (VIP All-Access Pass)
+  // 8. Default Mock User Subscription (VIP All-Access Pass)
   var mockSubscriptions = [{
     id: "sub-master-1",
     user_id: "admin-emran-id",
@@ -141,7 +198,7 @@
     }
   }];
 
-  // 7. Default Admin Security Settings
+  // 9. Default Admin Security Settings
   var mockAdminSecuritySettings = [{
     id: true,
     two_factor_enabled: false,
@@ -153,13 +210,13 @@
     panic_mode: false
   }];
 
-  // 8. Default Feature Flags
+  // 10. Default Feature Flags
   var mockFeatureFlags = [
     { key: "live_tv", enabled: false, label: "Live TV", description: "Live TV channels" },
     { key: "homepage_hero_banner", enabled: false, label: "Hero Banner", description: "Rotating hero banners" }
   ];
 
-  // 9. Default Payment Partners & Settings
+  // 11. Default Payment Partners & Settings
   var mockPaymentPartners = [
     { id: "partner-bkash", name: "bKash Merchant", code: "bkash", is_active: true, logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
     { id: "partner-nagad", name: "Nagad Direct", code: "nagad", is_active: true, logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
@@ -174,7 +231,7 @@
     exchange_rate: 120.0
   }];
 
-  // 10. Default Admin Dashboard Overview Statistics
+  // 12. Default Admin Dashboard Overview Statistics
   var todayStr = new Date().toISOString().split('T')[0];
   var series = [];
   var nowMs = Date.now();
@@ -217,12 +274,12 @@
     }
   };
 
-  // 11. Sanitizer for Full Mock Tests & titles
+  // 13. Sanitizer for clean titles and branding
   function cleanText(str) {
     if (typeof str !== 'string') return str;
     return str.replace(/PuroPuri/gi, "TestLoom")
               .replace(/puropuri/gi, "testloom")
-              .replace(//g, "—")
+              .replace(/puropuro/gi, "testloom")
               .replace(/\uFFFD/g, "—");
   }
 
@@ -249,13 +306,13 @@
     });
   }
 
-  // 12. Intercept window.fetch
+  // 14. Intercept window.fetch
   var originalFetch = window.fetch;
   window.fetch = function(input, init) {
     try {
       var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
       
-      // Local asset paths prefix handling
+      // Local asset paths prefix handling for subpaths
       if (typeof input === 'string' && isSubpath) {
         if (input.indexOf('/assets/') === 0 || input.indexOf('/icons/') === 0 || input.indexOf('/logo') === 0 || input.indexOf('/favicon') === 0) {
           input = basePath + input.slice(1);
@@ -263,7 +320,7 @@
         }
       }
 
-      // Fast IP / Geo bypass (prevents 6-second delay on login)
+      // Fast IP / Geo bypass (prevents 6-second timeout delay on login)
       if (url && (url.indexOf('ipapi.co') !== -1 || url.indexOf('api64.ipify.org') !== -1)) {
         return Promise.resolve(makeJsonResponse({
           ip: "127.0.0.1",
@@ -282,7 +339,9 @@
         var search = parsedUrl.search;
         var method = (init && init.method ? init.method : 'GET').toUpperCase();
 
+        // -------------------------------------------------------------
         // A. Handle Auth (Direct login & session tokens)
+        // -------------------------------------------------------------
         if (pathname.indexOf('/auth/v1/token') === 0) {
           var body = {};
           try {
@@ -312,7 +371,7 @@
             role: "authenticated",
             email: isAdmin ? "emranuc52@gmail.com" : email,
             email_confirmed_at: "2026-01-01T00:00:00Z",
-            phone: "+8801888888888",
+            phone: "+880 1700-000000",
             user_metadata: {
               full_name: isAdmin ? "Emran" : "Student User",
               role: isAdmin ? "admin" : "student"
@@ -341,7 +400,7 @@
             role: "authenticated",
             email: activeEmail,
             email_confirmed_at: "2026-01-01T00:00:00Z",
-            phone: "+8801888888888",
+            phone: "+880 1700-000000",
             user_metadata: {
               full_name: isAdminLogged ? "Emran" : "Student User",
               role: isAdminLogged ? "admin" : "student"
@@ -349,10 +408,177 @@
           }));
         }
 
-        // B. Handle RPC calls
+        // -------------------------------------------------------------
+        // B. Handle RPC calls (Admin Test Editor RPCs + System RPCs)
+        // -------------------------------------------------------------
         if (pathname.indexOf('/rest/v1/rpc/') === 0) {
           var rpcName = pathname.slice('/rest/v1/rpc/'.length).split('/')[0];
-          
+          var rpcBody = {};
+          try {
+            if (init && init.body) {
+              rpcBody = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
+            }
+          } catch(e) {}
+          var targetTestId = rpcBody._test_id || rpcBody.test_id || "";
+
+          // 1. Reading questions for Admin Editor
+          if (rpcName === 'admin_get_reading_questions') {
+            var localQuestions = getLocalTable('reading_questions').filter(function(q) {
+              return q.test_id === targetTestId;
+            });
+            if (localQuestions.length > 0) {
+              return Promise.resolve(makeJsonResponse(localQuestions));
+            }
+            // Fetch from reading_questions_student if available
+            var remoteUrl = 'https://jwwklcjvwgypqfznzsaw.supabase.co/rest/v1/reading_questions_student?test_id=eq.' + targetTestId + '&select=*';
+            return originalFetch.call(window, remoteUrl, {
+              headers: {
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2tsY2p2d2d5cHFmem56c2F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTU3ODAsImV4cCI6MjA5MTA3MTc4MH0.o6elEFn2vhV-TyXQ1sJgnL_jzKQrocZ2EFRRMlDwH04",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2tsY2p2d2d5cHFmem56c2F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTU3ODAsImV4cCI6MjA5MTA3MTc4MH0.o6elEFn2vhV-TyXQ1sJgnL_jzKQrocZ2EFRRMlDwH04"
+              }
+            }).then(function(res) {
+              if (res.ok) {
+                return res.json().then(function(data) {
+                  if (Array.isArray(data) && data.length > 0) {
+                    var mapped = data.map(function(q) {
+                      return {
+                        id: q.id,
+                        test_id: q.test_id,
+                        passage_id: q.passage_id || "",
+                        part: q.part || "1",
+                        question_type: q.question_type || "tfng",
+                        question_number: q.question_number,
+                        question_text: q.question_text || "",
+                        options: q.options || [],
+                        correct_answer: q.correct_answer || (q.options && q.options[0]) || "TRUE"
+                      };
+                    });
+                    return makeJsonResponse(mapped);
+                  }
+                  return makeJsonResponse([]);
+                });
+              }
+              return makeJsonResponse([]);
+            }).catch(function() {
+              return makeJsonResponse([]);
+            });
+          }
+
+          // 2. Listening questions for Admin Editor
+          if (rpcName === 'admin_get_listening_questions') {
+            var localLq = getLocalTable('listening_questions').filter(function(q) {
+              return q.test_id === targetTestId;
+            });
+            if (localLq.length > 0) {
+              return Promise.resolve(makeJsonResponse(localLq));
+            }
+            var remoteLqUrl = 'https://jwwklcjvwgypqfznzsaw.supabase.co/rest/v1/listening_questions_student?test_id=eq.' + targetTestId + '&select=*';
+            return originalFetch.call(window, remoteLqUrl, {
+              headers: {
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2tsY2p2d2d5cHFmem56c2F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTU3ODAsImV4cCI6MjA5MTA3MTc4MH0.o6elEFn2vhV-TyXQ1sJgnL_jzKQrocZ2EFRRMlDwH04",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2tsY2p2d2d5cHFmem56c2F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTU3ODAsImV4cCI6MjA5MTA3MTc4MH0.o6elEFn2vhV-TyXQ1sJgnL_jzKQrocZ2EFRRMlDwH04"
+              }
+            }).then(function(res) {
+              if (res.ok) {
+                return res.json().then(function(data) {
+                  if (Array.isArray(data) && data.length > 0) {
+                    var mappedL = data.map(function(q) {
+                      return {
+                        id: q.id,
+                        test_id: q.test_id,
+                        part_id: q.part_id || (targetTestId + "-part-1"),
+                        question_type: q.question_type || "fill",
+                        question_number: q.question_number,
+                        question_text: q.question_text || "",
+                        options: q.options || [],
+                        correct_answer: q.correct_answer || (q.options && q.options[0]) || "answer",
+                        section_title: q.section_title || "",
+                        instruction: q.instruction || null,
+                        image_url: q.image_url || null,
+                        image_caption: q.image_caption || null,
+                        image_range: q.image_range || null,
+                        answer_limit: q.answer_limit || null,
+                        number_override: q.number_override || null
+                      };
+                    });
+                    return makeJsonResponse(mappedL);
+                  }
+                  return makeJsonResponse([]);
+                });
+              }
+              return makeJsonResponse([]);
+            }).catch(function() {
+              return makeJsonResponse([]);
+            });
+          }
+
+          // 3. Listening parts for Admin Editor
+          if (rpcName === 'admin_get_listening_parts') {
+            var localParts = getLocalTable('listening_parts').filter(function(p) {
+              return p.test_id === targetTestId;
+            });
+            if (localParts.length > 0) {
+              return Promise.resolve(makeJsonResponse(localParts));
+            }
+            // Standard 4 IELTS Listening Parts
+            var defaultParts = [
+              { id: targetTestId + "-part-1", test_id: targetTestId, part_number: 1, title: "Part 1: Questions 1-10", prompt: "Social Needs - Everyday Conversation", section_title: "Part 1", audio_url: null, audio_script: "" },
+              { id: targetTestId + "-part-2", test_id: targetTestId, part_number: 2, title: "Part 2: Questions 11-20", prompt: "Social Needs - Monologue in Everyday Context", section_title: "Part 2", audio_url: null, audio_script: "" },
+              { id: targetTestId + "-part-3", test_id: targetTestId, part_number: 3, title: "Part 3: Questions 21-30", prompt: "Educational / Training Discussion", section_title: "Part 3", audio_url: null, audio_script: "" },
+              { id: targetTestId + "-part-4", test_id: targetTestId, part_number: 4, title: "Part 4: Questions 31-40", prompt: "Academic Subject Lecture", section_title: "Part 4", audio_url: null, audio_script: "" }
+            ];
+            return Promise.resolve(makeJsonResponse(defaultParts));
+          }
+
+          // 4. Listening audio for Admin Editor
+          if (rpcName === 'get_listening_test_audio') {
+            var localLTest = getLocalTable('listening_tests').find(function(t) { return t.id === targetTestId; });
+            return Promise.resolve(makeJsonResponse([{
+              audio_url: localLTest ? localLTest.audio_url : null,
+              continuous_audio_url: localLTest ? localLTest.continuous_audio_url : null
+            }]));
+          }
+
+          // 5. Writing questions for Admin Editor
+          if (rpcName === 'admin_get_writing_questions') {
+            var localWq = getLocalTable('writing_questions').filter(function(q) {
+              return q.test_id === targetTestId;
+            });
+            if (localWq.length > 0) {
+              return Promise.resolve(makeJsonResponse(localWq));
+            }
+            var remoteWqUrl = 'https://jwwklcjvwgypqfznzsaw.supabase.co/rest/v1/writing_questions_student?test_id=eq.' + targetTestId + '&select=*';
+            return originalFetch.call(window, remoteWqUrl, {
+              headers: {
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2tsY2p2d2d5cHFmem56c2F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTU3ODAsImV4cCI6MjA5MTA3MTc4MH0.o6elEFn2vhV-TyXQ1sJgnL_jzKQrocZ2EFRRMlDwH04",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2tsY2p2d2d5cHFmem56c2F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTU3ODAsImV4cCI6MjA5MTA3MTc4MH0.o6elEFn2vhV-TyXQ1sJgnL_jzKQrocZ2EFRRMlDwH04"
+              }
+            }).then(function(res) {
+              if (res.ok) {
+                return res.json().then(function(data) {
+                  return makeJsonResponse(Array.isArray(data) ? data : []);
+                });
+              }
+              return makeJsonResponse([]);
+            }).catch(function() {
+              return makeJsonResponse([]);
+            });
+          }
+
+          // 6. Test submission & scoring RPCs
+          if (rpcName === 'submit_reading_attempt' || rpcName === 'submit_listening_attempt' || 
+              rpcName === 'submit_writing_attempt' || rpcName === 'grade_test_answers' || 
+              rpcName === 'resolve_test_band') {
+            return Promise.resolve(makeJsonResponse({
+              success: true,
+              band: 7.5,
+              raw_score: 33,
+              total_questions: 40,
+              graded_at: new Date().toISOString()
+            }));
+          }
+
+          // 7. General verification & admin status RPCs
           if (rpcName === 'is_admin_verified' || rpcName === 'has_role') {
             return Promise.resolve(makeJsonResponse(true));
           }
@@ -394,7 +620,9 @@
           }
         }
 
+        // -------------------------------------------------------------
         // C. Handle Edge Functions
+        // -------------------------------------------------------------
         if (pathname.indexOf('/functions/v1/') === 0) {
           var funcName = pathname.slice('/functions/v1/'.length).split('/')[0].split('?')[0];
 
@@ -481,18 +709,126 @@
           return Promise.resolve(makeJsonResponse({ ok: true, success: true, data: [] }));
         }
 
-        // D. Handle REST tables for Ultra-Fast Loading
+        // -------------------------------------------------------------
+        // D. Handle REST Tables (Mutations: POST, PATCH, PUT, DELETE)
+        // -------------------------------------------------------------
         if (pathname.indexOf('/rest/v1/') === 0) {
           var tableName = pathname.slice('/rest/v1/'.length).split('/')[0];
 
-          // 1. site_settings (Resolves in 0ms, eliminates auth spinner completely)
-          if (tableName === 'site_settings') {
+          var testTables = [
+            'reading_tests', 'reading_passages', 'reading_passage_segments', 'reading_questions', 'reading_configs', 'reading_band_scores',
+            'listening_tests', 'listening_parts', 'listening_questions', 'listening_band_scores',
+            'writing_tests', 'writing_passages', 'writing_passage_segments', 'writing_questions', 'writing_configs', 'writing_band_scores',
+            'full_mock_tests', 'speaking_tests', 'test_reports', 'attempt_drafts'
+          ];
+
+          if (testTables.indexOf(tableName) !== -1 && method !== 'GET') {
+            var bodyData = null;
+            try {
+              if (init && init.body) {
+                bodyData = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
+              }
+            } catch(e) {}
+
+            var currentRows = getLocalTable(tableName);
+
+            // POST (Insert)
+            if (method === 'POST') {
+              var toInsert = Array.isArray(bodyData) ? bodyData : (bodyData ? [bodyData] : []);
+              var inserted = [];
+              toInsert.forEach(function(item) {
+                var copy = Object.assign({}, item);
+                if (!copy.id) copy.id = uuidv4();
+                if (!copy.created_at) copy.created_at = new Date().toISOString();
+                copy.updated_at = new Date().toISOString();
+                currentRows.push(copy);
+                inserted.push(copy);
+                // Index single test if applicable
+                if (TESTS_INDEX[tableName]) TESTS_INDEX[tableName][copy.id] = copy;
+              });
+              setLocalTable(tableName, currentRows);
+              MEM_CACHE = {}; // Clear memory cache so lists refresh instantly
+              var returnData = Array.isArray(bodyData) ? inserted : (inserted[0] || {});
+              return Promise.resolve(makeJsonResponse(returnData, 201));
+            }
+
+            // PATCH / PUT (Update)
+            if (method === 'PATCH' || method === 'PUT') {
+              var updatePatch = bodyData || {};
+              var idMatch = search.match(/id=eq\.([a-f0-9\-]+)/i);
+              var testIdMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+              var updatedRows = [];
+
+              if (idMatch) {
+                var targetId = idMatch[1];
+                var found = false;
+                currentRows = currentRows.map(function(row) {
+                  if (row.id === targetId) {
+                    found = true;
+                    var merged = Object.assign({}, row, updatePatch, { updated_at: new Date().toISOString() });
+                    updatedRows.push(merged);
+                    if (TESTS_INDEX[tableName]) TESTS_INDEX[tableName][targetId] = merged;
+                    return merged;
+                  }
+                  return row;
+                });
+                if (!found) {
+                  // Created local override for existing remote item
+                  var newItem = Object.assign({ id: targetId }, updatePatch, { updated_at: new Date().toISOString() });
+                  currentRows.push(newItem);
+                  updatedRows.push(newItem);
+                  if (TESTS_INDEX[tableName]) TESTS_INDEX[tableName][targetId] = newItem;
+                }
+              } else if (testIdMatch) {
+                var targetTid = testIdMatch[1];
+                currentRows = currentRows.map(function(row) {
+                  if (row.test_id === targetTid) {
+                    var merged = Object.assign({}, row, updatePatch, { updated_at: new Date().toISOString() });
+                    updatedRows.push(merged);
+                    return merged;
+                  }
+                  return row;
+                });
+              }
+
+              setLocalTable(tableName, currentRows);
+              MEM_CACHE = {};
+              return Promise.resolve(makeJsonResponse(updatedRows));
+            }
+
+            // DELETE
+            if (method === 'DELETE') {
+              var delIdMatch = search.match(/id=eq\.([a-f0-9\-]+)/i);
+              var delTestIdMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+
+              if (delIdMatch) {
+                var delId = delIdMatch[1];
+                addDeletedId(tableName, delId);
+                currentRows = currentRows.filter(function(row) { return row.id !== delId; });
+                if (TESTS_INDEX[tableName]) delete TESTS_INDEX[tableName][delId];
+              } else if (delTestIdMatch) {
+                var delTid = delTestIdMatch[1];
+                currentRows = currentRows.filter(function(row) { return row.test_id !== delTid; });
+              }
+
+              setLocalTable(tableName, currentRows);
+              MEM_CACHE = {};
+              return Promise.resolve(makeJsonResponse([]));
+            }
+          }
+
+          // -------------------------------------------------------------
+          // E. Handle REST Tables (Queries: GET)
+          // -------------------------------------------------------------
+
+          // 1. site_settings (0ms loading)
+          if (tableName === 'site_settings' && method === 'GET') {
             if (search.indexOf('key=eq.') !== -1) {
               var keyMatch = search.match(/key=eq\.([a-zA-Z0-9_\-]+)/);
               var reqKey = keyMatch ? keyMatch[1] : '';
-              var found = mockSiteSettings.filter(function(s) { return s.key === reqKey; });
-              if (found.length) {
-                return Promise.resolve(makeJsonResponse(found[0]));
+              var foundSetting = mockSiteSettings.filter(function(s) { return s.key === reqKey; });
+              if (foundSetting.length) {
+                return Promise.resolve(makeJsonResponse(foundSetting[0]));
               }
               return Promise.resolve(makeJsonResponse({ key: reqKey, value: "false" }));
             }
@@ -508,59 +844,59 @@
           }
 
           // 2. admin_security_settings
-          if (tableName === 'admin_security_settings') {
+          if (tableName === 'admin_security_settings' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockAdminSecuritySettings));
           }
 
           // 3. admin_verified_sessions
-          if (tableName === 'admin_verified_sessions') {
+          if (tableName === 'admin_verified_sessions' && method === 'GET') {
             return Promise.resolve(makeJsonResponse([{ id: "s-admin-1", user_id: "admin-emran-id", verified_at: new Date().toISOString() }]));
           }
 
           // 4. branding
-          if (tableName === 'branding' || tableName === 'admin_branding') {
+          if ((tableName === 'branding' || tableName === 'admin_branding') && method === 'GET') {
             return Promise.resolve(makeJsonResponse([mockBranding]));
           }
 
           // 5. user_subscriptions
-          if (tableName === 'user_subscriptions') {
+          if (tableName === 'user_subscriptions' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockSubscriptions));
           }
 
           // 6. free_trial_tests
-          if (tableName === 'free_trial_tests') {
+          if (tableName === 'free_trial_tests' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockFreeTrialTests));
           }
 
           // 7. feature_flags
-          if (tableName === 'feature_flags') {
+          if (tableName === 'feature_flags' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockFeatureFlags));
           }
 
           // 8. payment_partners & settings
-          if (tableName === 'payment_partners') {
+          if (tableName === 'payment_partners' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockPaymentPartners));
           }
-          if (tableName === 'payment_settings') {
+          if (tableName === 'payment_settings' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockPaymentSettings));
           }
 
           // 9. profiles
-          if (tableName === 'profiles') {
-            var isAdmin = localStorage.getItem('mock_admin') === 'true';
-            var em = isAdmin ? "emranuc52@gmail.com" : (localStorage.getItem('mock_student_email') || "student@testloom.com");
+          if (tableName === 'profiles' && method === 'GET') {
+            var isAdminProfile = localStorage.getItem('mock_admin') === 'true';
+            var em = isAdminProfile ? "emranuc52@gmail.com" : (localStorage.getItem('mock_student_email') || "student@testloom.com");
             return Promise.resolve(makeJsonResponse([{
-              id: isAdmin ? "admin-emran-id" : "student-user-1",
+              id: isAdminProfile ? "admin-emran-id" : "student-user-1",
               email: em,
-              full_name: isAdmin ? "Emran" : "Student",
-              role: isAdmin ? "admin" : "student",
-              phone: "01888888888",
+              full_name: isAdminProfile ? "Emran" : "Student",
+              role: isAdminProfile ? "admin" : "student",
+              phone: "+880 1700-000000",
               is_active: true
             }]));
           }
 
           // 10. customer_care_profiles
-          if (tableName === 'customer_care_profiles') {
+          if (tableName === 'customer_care_profiles' && method === 'GET') {
             return Promise.resolve(makeJsonResponse([{
               id: "cc-1",
               name: "Emran (Admin)",
@@ -570,40 +906,242 @@
           }
 
           // 11. empty collections that can block layouts
-          if (tableName === 'marketing_popups' || tableName === 'announcement_banners' || 
-              tableName === 'dashboard_hero_banners' || tableName === 'user_notifications' || 
-              tableName === 'push_subscriptions' || tableName === 'conversations' || 
-              tableName === 'messages' || tableName === 'role_page_permissions') {
+          if ((tableName === 'marketing_popups' || tableName === 'announcement_banners' || 
+               tableName === 'dashboard_hero_banners' || tableName === 'user_notifications' || 
+               tableName === 'push_subscriptions' || tableName === 'conversations' || 
+               tableName === 'messages' || tableName === 'role_page_permissions') && method === 'GET') {
             return Promise.resolve(makeJsonResponse([]));
           }
 
-          // 12. Instant Index Lookup for single test items (Reading, Listening, Writing, Speaking)
+          // 12. Reading Passages (with embedded segments support)
+          if (tableName === 'reading_passages' && method === 'GET') {
+            var tIdMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var reqTestId = tIdMatch ? tIdMatch[1] : "";
+            var localPassages = getLocalTable('reading_passages').filter(function(p) {
+              return !reqTestId || p.test_id === reqTestId;
+            });
+
+            if (localPassages.length > 0) {
+              var localSegments = getLocalTable('reading_passage_segments');
+              var fullPassages = localPassages.map(function(p) {
+                var pCopy = Object.assign({}, p);
+                pCopy.segments = localSegments.filter(function(s) { return s.passage_id === p.id; });
+                return pCopy;
+              });
+              return Promise.resolve(makeJsonResponse(fullPassages));
+            }
+
+            // Fallback: Default 3 Reading Passages for the test
+            if (reqTestId) {
+              var defaultPassages = [
+                {
+                  id: reqTestId + "-passage-1",
+                  test_id: reqTestId,
+                  order: 1,
+                  title: "Reading Passage 1",
+                  description: "You should spend about 20 minutes on Questions 1–13.",
+                  segments: [
+                    { id: reqTestId + "-s1-a", label: "A", content: "The development of modern agriculture has transformed societies around the world, providing sustenance for billions while presenting environmental challenges." },
+                    { id: reqTestId + "-s1-b", label: "B", content: "Historical records show that early agrarian communities utilized sophisticated irrigation networks to maximize crop yields across diverse climates." },
+                    { id: reqTestId + "-s1-c", label: "C", content: "Contemporary researchers emphasize the importance of sustainable cultivation techniques that protect soil biodiversity and conserve freshwater resources." }
+                  ]
+                },
+                {
+                  id: reqTestId + "-passage-2",
+                  test_id: reqTestId,
+                  order: 2,
+                  title: "Reading Passage 2",
+                  description: "You should spend about 20 minutes on Questions 14–26.",
+                  segments: [
+                    { id: reqTestId + "-s2-a", label: "A", content: "Cognitive science has made remarkable strides in understanding human memory consolidation and the role of neuroplasticity." },
+                    { id: reqTestId + "-s2-b", label: "B", content: "Experiments demonstrate that deliberate spaced repetition significantly enhances long-term retention compared to massed practice." },
+                    { id: reqTestId + "-s2-c", label: "C", content: "These insights are now being integrated into digital learning platforms to deliver personalized educational interventions." }
+                  ]
+                },
+                {
+                  id: reqTestId + "-passage-3",
+                  test_id: reqTestId,
+                  order: 3,
+                  title: "Reading Passage 3",
+                  description: "You should spend about 20 minutes on Questions 27–40.",
+                  segments: [
+                    { id: reqTestId + "-s3-a", label: "A", content: "Renewable energy technologies have experienced exponential growth, driven by advances in photovoltaic efficiency and grid storage." },
+                    { id: reqTestId + "-s3-b", label: "B", content: "Economic models indicate that transitioning to low-carbon infrastructure yields substantial net positive returns across multiple sectors." },
+                    { id: reqTestId + "-s3-c", label: "C", content: "Global cooperation and policy harmonisation remain indispensable prerequisites for achieving international climate benchmarks." }
+                  ]
+                }
+              ];
+              return Promise.resolve(makeJsonResponse(defaultPassages));
+            }
+          }
+
+          // 13. Reading Passage Segments
+          if (tableName === 'reading_passage_segments' && method === 'GET') {
+            var localSegs = getLocalTable('reading_passage_segments');
+            return Promise.resolve(makeJsonResponse(localSegs));
+          }
+
+          // 14. Reading Configs
+          if (tableName === 'reading_configs' && method === 'GET') {
+            var rcTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var reqRcId = rcTestMatch ? rcTestMatch[1] : "";
+            var localConfigs = getLocalTable('reading_configs').filter(function(c) {
+              return !reqRcId || c.test_id === reqRcId;
+            });
+            if (localConfigs.length > 0) {
+              return Promise.resolve(makeJsonResponse(localConfigs));
+            }
+            if (reqRcId) {
+              return Promise.resolve(makeJsonResponse([
+                { id: reqRcId + "-cfg-1", test_id: reqRcId, part_number: 1, total_questions: 13, start_question: 1 },
+                { id: reqRcId + "-cfg-2", test_id: reqRcId, part_number: 2, total_questions: 13, start_question: 14 },
+                { id: reqRcId + "-cfg-3", test_id: reqRcId, part_number: 3, total_questions: 14, start_question: 27 }
+              ]));
+            }
+          }
+
+          // 15. Reading & Listening & Writing Band Scores
+          if ((tableName === 'reading_band_scores' || tableName === 'listening_band_scores' || tableName === 'writing_band_scores') && method === 'GET') {
+            var bsTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var reqBsId = bsTestMatch ? bsTestMatch[1] : "";
+            var localBands = getLocalTable(tableName).filter(function(b) {
+              return !reqBsId || b.test_id === reqBsId;
+            });
+            if (localBands.length > 0) {
+              return Promise.resolve(makeJsonResponse(localBands));
+            }
+            var mappedBands = standardBandScores.map(function(b, idx) {
+              return { id: reqBsId + "-band-" + idx, test_id: reqBsId, band: b.band, min_score: b.min_score };
+            });
+            return Promise.resolve(makeJsonResponse(mappedBands));
+          }
+
+          // 16. Listening Parts
+          if (tableName === 'listening_parts' && method === 'GET') {
+            var lpTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var reqLpId = lpTestMatch ? lpTestMatch[1] : "";
+            var localLp = getLocalTable('listening_parts').filter(function(p) {
+              return !reqLpId || p.test_id === reqLpId;
+            });
+            if (localLp.length > 0) {
+              return Promise.resolve(makeJsonResponse(localLp));
+            }
+            if (reqLpId) {
+              return Promise.resolve(makeJsonResponse([
+                { id: reqLpId + "-part-1", test_id: reqLpId, part_number: 1, title: "Part 1: Questions 1-10", prompt: "Social Needs - Everyday Conversation", section_title: "Part 1", audio_url: null, audio_script: "" },
+                { id: reqLpId + "-part-2", test_id: reqLpId, part_number: 2, title: "Part 2: Questions 11-20", prompt: "Social Needs - Monologue in Everyday Context", section_title: "Part 2", audio_url: null, audio_script: "" },
+                { id: reqLpId + "-part-3", test_id: reqLpId, part_number: 3, title: "Part 3: Questions 21-30", prompt: "Educational / Training Discussion", section_title: "Part 3", audio_url: null, audio_script: "" },
+                { id: reqLpId + "-part-4", test_id: reqLpId, part_number: 4, title: "Part 4: Questions 31-40", prompt: "Academic Subject Lecture", section_title: "Part 4", audio_url: null, audio_script: "" }
+              ]));
+            }
+          }
+
+          // 17. Writing Passages & Configs
+          if (tableName === 'writing_passages' && method === 'GET') {
+            var wpTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var reqWpId = wpTestMatch ? wpTestMatch[1] : "";
+            var localWp = getLocalTable('writing_passages').filter(function(p) {
+              return !reqWpId || p.test_id === reqWpId;
+            });
+            if (localWp.length > 0) {
+              return Promise.resolve(makeJsonResponse(localWp));
+            }
+            if (reqWpId) {
+              return Promise.resolve(makeJsonResponse([
+                { id: reqWpId + "-wp-1", test_id: reqWpId, order: 1, title: "Writing Task 1", description: "You should spend about 20 minutes on this task. Write at least 150 words.", chart_image_url: null },
+                { id: reqWpId + "-wp-2", test_id: reqWpId, order: 2, title: "Writing Task 2", description: "You should spend about 40 minutes on this task. Write at least 250 words.", chart_image_url: null }
+              ]));
+            }
+          }
+
+          if (tableName === 'writing_configs' && method === 'GET') {
+            var wcTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var reqWcId = wcTestMatch ? wcTestMatch[1] : "";
+            var localWc = getLocalTable('writing_configs').filter(function(c) {
+              return !reqWcId || c.test_id === reqWcId;
+            });
+            if (localWc.length > 0) {
+              return Promise.resolve(makeJsonResponse(localWc));
+            }
+            if (reqWcId) {
+              return Promise.resolve(makeJsonResponse([
+                { id: reqWcId + "-wc-1", test_id: reqWcId, part_number: 1, total_questions: 1, start_question: 1 },
+                { id: reqWcId + "-wc-2", test_id: reqWcId, part_number: 2, total_questions: 1, start_question: 2 }
+              ]));
+            }
+          }
+
+          // 18. Individual Test Item Lookups (Reading, Listening, Writing, Full Mock, Speaking)
           var isModuleTable = (tableName === 'reading_tests' || tableName === 'listening_tests' || 
-                               tableName === 'writing_tests' || tableName === 'speaking_tests');
+                               tableName === 'writing_tests' || tableName === 'speaking_tests' || 
+                               tableName === 'full_mock_tests');
           if (isModuleTable && method === 'GET') {
             var idEqMatch = search.match(/id=eq\.([a-f0-9\-]+)/i);
             if (idEqMatch) {
-              var targetId = idEqMatch[1];
-              var indexedItem = TESTS_INDEX[tableName] && TESTS_INDEX[tableName][targetId];
+              var targetLookupId = idEqMatch[1];
+              // 1. Check local storage
+              var localItem = getLocalTable(tableName).find(function(t) { return t.id === targetLookupId; });
+              if (localItem) {
+                return Promise.resolve(makeJsonResponse([localItem]));
+              }
+              // 2. Check memory index
+              var indexedItem = TESTS_INDEX[tableName] && TESTS_INDEX[tableName][targetLookupId];
               if (indexedItem) {
                 return Promise.resolve(makeJsonResponse([indexedItem]));
               }
             }
           }
 
-          // 13. Caching & Sanitization for test modules & packages
-          var isCachedTable = isModuleTable || (tableName === 'full_mock_tests' || tableName === 'packages');
+          // 19. Test Modules List (Merging Remote Tests with Admin Local Updates)
+          var isCachedTable = isModuleTable || (tableName === 'packages');
           if (isCachedTable && method === 'GET') {
             var cacheKey = 'cache_' + tableName + '_' + search;
             if (MEM_CACHE[cacheKey]) {
               return Promise.resolve(makeJsonResponse(MEM_CACHE[cacheKey]));
             }
-            return originalFetch.call(window, input, init).then(function(resp) {
+
+            // Fallback column query for listening_tests if select=* causes column permission issue
+            var queryInput = input;
+            if (tableName === 'listening_tests' && (search.indexOf('select=*') !== -1 || !search)) {
+              queryInput = 'https://jwwklcjvwgypqfznzsaw.supabase.co/rest/v1/listening_tests?select=id,title,total_time,is_active,test_type,series,book_number,test_number,total_questions,instruction_video_url,audio_filename,instructions,reading_test_id,created_at,updated_at';
+            }
+
+            return originalFetch.call(window, queryInput, init).then(function(resp) {
               if (resp.ok) {
                 return resp.clone().json().then(function(data) {
                   var clean = sanitizeMockTests(data);
+
+                  // Merge local modifications & new tests created by Admin
+                  var localRows = getLocalTable(tableName);
+                  var deletedIds = getDeletedIds(tableName);
+
+                  if (Array.isArray(clean)) {
+                    var localMap = {};
+                    localRows.forEach(function(r) { if (r && r.id) localMap[r.id] = r; });
+
+                    // Update existing items or keep
+                    var merged = clean.filter(function(item) {
+                      return item && item.id && deletedIds.indexOf(item.id) === -1;
+                    }).map(function(item) {
+                      if (localMap[item.id]) {
+                        var ov = Object.assign({}, item, localMap[item.id]);
+                        delete localMap[item.id];
+                        return ov;
+                      }
+                      return item;
+                    });
+
+                    // Prepend newly created local tests
+                    Object.keys(localMap).forEach(function(k) {
+                      if (deletedIds.indexOf(k) === -1) {
+                        merged.unshift(localMap[k]);
+                      }
+                    });
+
+                    clean = merged;
+                  }
+
                   MEM_CACHE[cacheKey] = clean;
-                  // Populate index for individual lookups
                   if (Array.isArray(clean) && TESTS_INDEX[tableName]) {
                     clean.forEach(function(item) {
                       if (item && item.id) TESTS_INDEX[tableName][item.id] = item;
@@ -612,10 +1150,12 @@
                   return makeJsonResponse(clean, resp.status, resp.headers);
                 }).catch(function() { return resp; });
               }
-              // If remote fails, return empty list instead of hanging
-              return makeJsonResponse([]);
+              // If remote fails, return local table items
+              var fallbackLocal = getLocalTable(tableName);
+              return makeJsonResponse(fallbackLocal);
             }).catch(function() {
-              return makeJsonResponse([]);
+              var fallbackLocal = getLocalTable(tableName);
+              return makeJsonResponse(fallbackLocal);
             });
           }
         }
@@ -627,15 +1167,15 @@
     return originalFetch.call(this, input, init);
   };
 
-  // 13. Pre-warm test module caches in background for instant full-mock tests
+  // 15. Pre-warm test module caches in background for instant loading
   setTimeout(function() {
     try {
-      ['reading_tests', 'listening_tests', 'writing_tests', 'speaking_tests'].forEach(function(tbl) {
+      ['reading_tests', 'listening_tests', 'writing_tests', 'speaking_tests', 'full_mock_tests'].forEach(function(tbl) {
         var dummyUrl = 'https://jwwklcjvwgypqfznzsaw.supabase.co/rest/v1/' + tbl + '?select=id,title,total_time,test_type,is_active';
         fetch(dummyUrl).catch(function(){});
       });
     } catch(e) {}
   }, 100);
 
-  console.log("%c[TestLoom] Ultra-Fast Adapter active. Base: " + basePath, "color:#10b981;font-weight:bold;");
+  console.log("%c[TestLoom] Ultra-Fast Adapter active. Full Admin test studio write & load enabled. Base: " + basePath, "color:#10b981;font-weight:bold;");
 })();
