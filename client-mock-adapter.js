@@ -654,9 +654,94 @@
           if (rpcName === 'get_vapid_public_key' || rpcName === 'server_time') {
             return Promise.resolve(makeJsonResponse({ key: "mock-vapid-key", time: new Date().toISOString() }));
           }
+          // Admin notification RPCs
+          if (rpcName === 'admin_total_unread' || rpcName === 'admin_notification_counts') {
+            return Promise.resolve(makeJsonResponse({ unread: 0, total: 0 }));
+          }
+          if (rpcName === 'admin_mark_all_read') {
+            return Promise.resolve(makeJsonResponse({ success: true }));
+          }
+          // Referral RPCs
+          if (rpcName === 'admin_get_referral_settings' || rpcName === 'get_public_referral_settings') {
+            return Promise.resolve(makeJsonResponse({ enabled: false, reward_type: 'none', reward_amount: 0 }));
+          }
+          if (rpcName === 'get_my_referral_click_stats') {
+            return Promise.resolve(makeJsonResponse({ total_clicks: 0, conversions: 0, earnings: 0 }));
+          }
+          // Security RPCs
+          if (rpcName === 'get_security_overview' || rpcName === 'get_security_settings') {
+            return Promise.resolve(makeJsonResponse({ two_factor: false, trusted_devices: true, panic_mode: false }));
+          }
+          if (rpcName === 'get_security_settings') {
+            return Promise.resolve(makeJsonResponse([{ id: true, two_factor_enabled: false, panic_mode: false }]));
+          }
+          if (rpcName === 'list_security_rules' || rpcName === 'list_security_backups') {
+            return Promise.resolve(makeJsonResponse([]));
+          }
+          if (rpcName === 'panic_wipe_admin_sessions') {
+            return Promise.resolve(makeJsonResponse({ success: true }));
+          }
+          // Study plan RPCs
+          if (rpcName === 'get_study_plan_analytics') {
+            return Promise.resolve(makeJsonResponse({ total_days: 0, completed: 0, streak: 0 }));
+          }
+          // Subscriber overview
+          if (rpcName === 'get_subscriber_overview') {
+            return Promise.resolve(makeJsonResponse({ active: 85, expired: 12, total: 97 }));
+          }
+          // Chatbot RPCs
+          if (rpcName === 'admin_get_ai_chatbot_config' || rpcName === 'get_public_chatbot_config') {
+            return Promise.resolve(makeJsonResponse({ enabled: false, provider: 'gemini', model: 'gemini-2.0-flash' }));
+          }
+          // Admin centers overview
+          if (rpcName === 'admin_centers_overview') {
+            return Promise.resolve(makeJsonResponse({ total: 0, active: 0, students: 0 }));
+          }
+          // License/deployment RPCs
+          if (rpcName === 'get_license_clients_overview' || rpcName === 'list_published_source_versions') {
+            return Promise.resolve(makeJsonResponse([]));
+          }
+          if (rpcName === 'get_gateway_public_config') {
+            return Promise.resolve(makeJsonResponse({ bkash: true, nagad: true, stripe: true }));
+          }
+          // Device limit
+          if (rpcName === 'get_device_limit_overview') {
+            return Promise.resolve(makeJsonResponse({ limit: 3, current: 1 }));
+          }
+          // Live speaking
+          if (rpcName.indexOf('ls_') === 0) {
+            return Promise.resolve(makeJsonResponse({ success: true, count: 0, items: [], queue: [] }));
+          }
+          // Conversation
+          if (rpcName === 'get_or_create_my_conversation') {
+            return Promise.resolve(makeJsonResponse({ id: 'conv-1', status: 'open' }));
+          }
+          // Deduplication
+          if (rpcName === 'dedupe_user_sessions') {
+            return Promise.resolve(makeJsonResponse({ removed: 0 }));
+          }
+          // AI usage
+          if (rpcName === 'ensure_ai_speaking_usage_day') {
+            return Promise.resolve(makeJsonResponse({ success: true }));
+          }
+          // Zinipay secrets
+          if (rpcName === 'zinipay_webhook_secrets_list') {
+            return Promise.resolve(makeJsonResponse([]));
+          }
+          // Center RPCs
+          if (rpcName.indexOf('center_') === 0 || rpcName === 'my_center_memberships' || rpcName === 'my_center_student') {
+            return Promise.resolve(makeJsonResponse([]));
+          }
+          // Grading QA
+          if (rpcName === 'grading_qa_report') {
+            return Promise.resolve(makeJsonResponse({ items: [], total: 0 }));
+          }
+
           if (rpcName.indexOf('cc_') === 0 || rpcName.indexOf('log_') === 0 || rpcName.indexOf('upsert_') === 0 || rpcName.indexOf('record_') === 0) {
             return Promise.resolve(makeJsonResponse([]));
           }
+          // Final catch-all for any unknown RPC — return success to prevent hangs
+          return Promise.resolve(makeJsonResponse({ success: true, data: [], items: [], total: 0 }));
         }
 
         // -------------------------------------------------------------
@@ -958,7 +1043,89 @@
                tableName === 'roadmap_progress' || tableName === 'fox_token_transactions' ||
                tableName === 'referrals' || tableName === 'packages' || tableName === 'billing_transactions' ||
                tableName === 'notification_preferences' || tableName === 'student_notes' ||
-               tableName === 'study_streaks' || tableName === 'vocab_sets' || tableName === 'vocab_progress') && method === 'GET') {
+               tableName === 'study_streaks' || tableName === 'vocab_sets' || tableName === 'vocab_progress' ||
+               // Admin-only tables (all return empty for safety)
+               tableName === 'admin_audit_log' || tableName === 'admin_email_settings' ||
+               tableName === 'admin_push_recipients' || tableName === 'admin_push_templates' ||
+               tableName === 'admin_totp_secrets' || tableName === 'admin_trusted_devices' ||
+               tableName === 'admin_verification_attempts' ||
+               tableName === 'ai_chatbot_config' || tableName === 'ai_grading_settings' ||
+               tableName === 'ai_grading_usage' || tableName === 'ai_speaking_config' ||
+               tableName === 'ai_speaking_usage' || tableName === 'attempt_timers' ||
+               tableName === 'banners' || tableName === 'broadcasts' ||
+               tableName === 'card_design_order' || tableName === 'card_design_versions' ||
+               tableName === 'card_designs_custom' ||
+               tableName === 'center_activity_logs' || tableName === 'center_announcements' ||
+               tableName === 'center_applications' || tableName === 'center_batches' ||
+               tableName === 'center_devices' || tableName === 'center_ip_rules' ||
+               tableName === 'center_packages' || tableName === 'center_plan_pricing' ||
+               tableName === 'center_renewal_requests' || tableName === 'center_results' ||
+               tableName === 'center_students' || tableName === 'center_subscriptions' ||
+               tableName === 'center_test_assignments' || tableName === 'center_test_sessions' ||
+               tableName === 'center_test_submissions' || tableName === 'center_test_template_items' ||
+               tableName === 'center_test_templates' || tableName === 'center_users' ||
+               tableName === 'centers' || tableName === 'chat_conversations' ||
+               tableName === 'chatbot_config' || tableName === 'client_appointment_requests' ||
+               tableName === 'client_deploy_logs' || tableName === 'client_deployment_telemetry' ||
+               tableName === 'client_deployments' || tableName === 'client_deployments_safe' ||
+               tableName === 'client_error_logs' || tableName === 'client_pending_updates' ||
+               tableName === 'cloudflare_r2_accounts' || tableName === 'coupons' ||
+               tableName === 'device_blocklist' || tableName === 'device_limit_events' ||
+               tableName === 'elementor_pages' || tableName === 'elementor_revisions' ||
+               tableName === 'email_automation_queue' || tableName === 'email_automation_settings' ||
+               tableName === 'email_automation_steps' || tableName === 'email_automations' ||
+               tableName === 'email_campaigns' || tableName === 'email_logs' ||
+               tableName === 'email_send_jobs' || tableName === 'email_template_categories' ||
+               tableName === 'email_templates' || tableName === 'email_user_preferences' ||
+               tableName === 'gemini_api_keys' || tableName === 'generation_job_logs' ||
+               tableName === 'generation_jobs' || tableName === 'google_sheets_config' ||
+               tableName === 'grading_audit_log' || tableName === 'install_push_config' ||
+               tableName === 'install_push_events' || tableName === 'install_push_user_state' ||
+               tableName === 'ip_allowlist' || tableName === 'ip_blocklist' ||
+               tableName === 'item_wise_tests' || tableName === 'license_verifications' ||
+               tableName === 'link_tracking_settings' || tableName === 'listening_ai_settings' ||
+               tableName === 'listening_transcripts' || tableName === 'live_presences' ||
+               tableName === 'live_speaking_calls' || tableName === 'live_speaking_settings' ||
+               tableName === 'livetv_channel_servers' || tableName === 'livetv_channels' ||
+               tableName === 'livetv_playlists' || tableName === 'message_labels' ||
+               tableName === 'mobile_menu_items' || tableName === 'notification_campaigns' ||
+               tableName === 'notification_templates' || tableName === 'page_layouts' ||
+               tableName === 'part_practice_config' || tableName === 'payments' ||
+               tableName === 'pdf_analyzed_data' || tableName === 'pending_payment_orders' ||
+               tableName === 'platform_build_artifacts' || tableName === 'platform_releases' ||
+               tableName === 'practice_hero_config' || tableName === 'presence_activity_log' ||
+               tableName === 'quick_replies' || tableName === 'reading_question_groups' ||
+               tableName === 'referral_clicks' || tableName === 'referral_landing_config' ||
+               tableName === 'referral_settings' || tableName === 'roadmap_days' ||
+               tableName === 'security_settings' || tableName === 'security_settings_backups' ||
+               tableName === 'seo_audit_findings' || tableName === 'seo_audit_runs' ||
+               tableName === 'seo_pages' || tableName === 'seo_redirects' ||
+               tableName === 'seo_settings' || tableName === 'site_content' ||
+               tableName === 'sms_campaigns' || tableName === 'sms_contacts' ||
+               tableName === 'sms_recipients' || tableName === 'sms_replies' ||
+               tableName === 'sms_sender_ids' || tableName === 'sms_settings' ||
+               tableName === 'sms_templates' || tableName === 'source_code_licenses' ||
+               tableName === 'source_code_versions' || tableName === 'speaking_ai_answers' ||
+               tableName === 'speaking_announcements' || tableName === 'speaking_appointments' ||
+               tableName === 'speaking_partner_announcements' || tableName === 'speaking_partner_cohosts' ||
+               tableName === 'speaking_partner_join_requests' || tableName === 'speaking_partner_messages' ||
+               tableName === 'speaking_partner_participants' || tableName === 'speaking_partner_reactions' ||
+               tableName === 'speaking_partner_removed_users' || tableName === 'speaking_partner_reports' ||
+               tableName === 'speaking_partner_reviews' || tableName === 'speaking_partner_rooms' ||
+               tableName === 'speaking_partners' || tableName === 'speaking_plans' ||
+               tableName === 'speaking_scenarios' || tableName === 'speaking_sessions' ||
+               tableName === 'speaking_slots' || tableName === 'speaking_test_parts' ||
+               tableName === 'speaking_test_questions' || tableName === 'speaking_tts_assets' ||
+               tableName === 'staff_roles' || tableName === 'stories' ||
+               tableName === 'student_assignments' || tableName === 'student_auto_notifications' ||
+               tableName === 'student_section_config' || tableName === 'study_plan_templates' ||
+               tableName === 'submission_status_thresholds' || tableName === 'testimonials' ||
+               tableName === 'tracked_links' || tableName === 'user_devices' ||
+               tableName === 'user_roles' || tableName === 'vapid_keys' ||
+               tableName === 'vocabulary_quiz_attempts' || tableName === 'vocabulary_topics' ||
+               tableName === 'vocabulary_word_progress' || tableName === 'vocabulary_words' ||
+               tableName === 'writing_grading_events' || tableName === 'zinipay_payment_events'
+             ) && method === 'GET') {
             return Promise.resolve(makeJsonResponse([]));
           }
 
