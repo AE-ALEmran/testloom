@@ -568,13 +568,52 @@
           // 6. Test submission & scoring RPCs
           if (rpcName === 'submit_reading_attempt' || rpcName === 'submit_listening_attempt' || 
               rpcName === 'submit_writing_attempt' || rpcName === 'grade_test_answers' || 
-              rpcName === 'resolve_test_band') {
+              rpcName === 'resolve_test_band' || rpcName === 'finalize_attempt' ||
+              rpcName === 'submit_full_mock_attempt' || rpcName === 'complete_attempt') {
+            var band = (Math.round((6.0 + Math.random() * 2.5) * 2) / 2).toFixed(1);
             return Promise.resolve(makeJsonResponse({
               success: true,
-              band: 7.5,
-              raw_score: 33,
+              attempt_id: rpcBody.attempt_id || ('att-' + Date.now()),
+              band: parseFloat(band),
+              overall_band: parseFloat(band),
+              reading_band: rpcName.indexOf('reading') !== -1 ? parseFloat(band) : null,
+              listening_band: rpcName.indexOf('listening') !== -1 ? parseFloat(band) : null,
+              writing_band: rpcName.indexOf('writing') !== -1 ? parseFloat(band) : null,
+              raw_score: 30 + Math.floor(Math.random() * 8),
               total_questions: 40,
-              graded_at: new Date().toISOString()
+              correct_answers: 30 + Math.floor(Math.random() * 8),
+              graded_at: new Date().toISOString(),
+              status: 'completed'
+            }));
+          }
+
+          // 6b. Student dashboard stats RPC
+          if (rpcName === 'student_dashboard_overview' || rpcName === 'get_student_stats') {
+            return Promise.resolve(makeJsonResponse({
+              total_attempts: 7,
+              completed_attempts: 6,
+              avg_band: 7.1,
+              best_band: 8.0,
+              reading_avg: 7.0,
+              listening_avg: 7.5,
+              writing_avg: 6.5,
+              speaking_avg: 6.5,
+              streak_days: 5,
+              total_time_minutes: 420,
+              last_attempt_at: new Date(Date.now() - 2*86400000).toISOString()
+            }));
+          }
+
+          // 6c. resume/start attempt RPCs
+          if (rpcName === 'start_reading_attempt' || rpcName === 'start_listening_attempt' ||
+              rpcName === 'start_writing_attempt' || rpcName === 'start_full_mock_attempt' ||
+              rpcName === 'resume_attempt' || rpcName === 'create_attempt') {
+            return Promise.resolve(makeJsonResponse({
+              success: true,
+              attempt_id: 'att-' + Date.now(),
+              id: 'att-' + Date.now(),
+              status: 'in_progress',
+              started_at: new Date().toISOString()
             }));
           }
 
@@ -719,7 +758,9 @@
             'reading_tests', 'reading_passages', 'reading_passage_segments', 'reading_questions', 'reading_configs', 'reading_band_scores',
             'listening_tests', 'listening_parts', 'listening_questions', 'listening_band_scores',
             'writing_tests', 'writing_passages', 'writing_passage_segments', 'writing_questions', 'writing_configs', 'writing_band_scores',
-            'full_mock_tests', 'speaking_tests', 'test_reports', 'attempt_drafts'
+            'full_mock_tests', 'speaking_tests', 'test_reports', 'attempt_drafts',
+            'test_attempts', 'writing_submissions', 'speaking_ai_submissions',
+            'reading_attempt_answers', 'listening_attempt_answers'
           ];
 
           if (testTables.indexOf(tableName) !== -1 && method !== 'GET') {
@@ -909,8 +950,68 @@
           if ((tableName === 'marketing_popups' || tableName === 'announcement_banners' || 
                tableName === 'dashboard_hero_banners' || tableName === 'user_notifications' || 
                tableName === 'push_subscriptions' || tableName === 'conversations' || 
-               tableName === 'messages' || tableName === 'role_page_permissions') && method === 'GET') {
+               tableName === 'messages' || tableName === 'role_page_permissions' ||
+               tableName === 'regrade_audit_log' || tableName === 'admin_manual_jobs' ||
+               tableName === 'live_tracking_settings' || tableName === 'attempt_answers' ||
+               tableName === 'reading_attempt_answers' || tableName === 'listening_attempt_answers' ||
+               tableName === 'speaking_attempt_answers' || tableName === 'roadmap_tasks' ||
+               tableName === 'roadmap_progress' || tableName === 'fox_token_transactions' ||
+               tableName === 'referrals' || tableName === 'packages' || tableName === 'billing_transactions' ||
+               tableName === 'notification_preferences' || tableName === 'student_notes' ||
+               tableName === 'study_streaks' || tableName === 'vocab_sets' || tableName === 'vocab_progress') && method === 'GET') {
             return Promise.resolve(makeJsonResponse([]));
+          }
+
+          // 11b. study_plans (Results page - student study plan)
+          if (tableName === 'study_plans' && method === 'GET') {
+            return Promise.resolve(makeJsonResponse([]));
+          }
+
+          // 11c. test_attempts — drives Dashboard stats, MyReports, ResultDetail, Leaderboard, FoxToken
+          if (tableName === 'test_attempts' && method === 'GET') {
+            var isAdminTa = localStorage.getItem('mock_admin') === 'true';
+            var userId = isAdminTa ? 'admin-emran-id' : 'student-user-1';
+            // Build realistic mock attempts
+            var mockAttempts = [
+              { id: 'att-r-1', user_id: userId, test_id: '0e6e815f-3ffb-485f-bf46-32cd854aabd4', test_type: 'reading', status: 'completed', raw_score: 33, overall_band: 7.5, reading_band: 7.5, listening_band: null, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 2*86400000).toISOString(), completed_at: new Date(Date.now() - 2*86400000 + 3600000).toISOString(), time_taken: 3600, total_questions: 40, correct_answers: 33 },
+              { id: 'att-l-1', user_id: userId, test_id: '290296c5-f08d-4947-9568-f8028d7dbc24', test_type: 'listening', status: 'completed', raw_score: 30, overall_band: 7.0, reading_band: null, listening_band: 7.0, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 4*86400000).toISOString(), completed_at: new Date(Date.now() - 4*86400000 + 2400000).toISOString(), time_taken: 2400, total_questions: 40, correct_answers: 30 },
+              { id: 'att-w-1', user_id: userId, test_id: 'de97785a-94f5-4e74-9a7d-16ff4490ac75', test_type: 'writing', status: 'completed', raw_score: null, overall_band: 6.5, reading_band: null, listening_band: null, writing_band: 6.5, speaking_band: null, started_at: new Date(Date.now() - 6*86400000).toISOString(), completed_at: new Date(Date.now() - 6*86400000 + 4800000).toISOString(), time_taken: 4800, total_questions: 2, correct_answers: null },
+              { id: 'att-fm-1', user_id: userId, test_id: 'c3454b1e-6a91-44e7-a4b7-87cca312c1dd', test_type: 'full_mock', status: 'completed', raw_score: null, overall_band: 7.0, reading_band: 7.5, listening_band: 7.0, writing_band: 6.5, speaking_band: null, started_at: new Date(Date.now() - 8*86400000).toISOString(), completed_at: new Date(Date.now() - 8*86400000 + 10800000).toISOString(), time_taken: 10800, total_questions: 80, correct_answers: null },
+              { id: 'att-r-2', user_id: userId, test_id: '475fe04b-060d-4267-b8ef-e1d37785fb49', test_type: 'reading', status: 'completed', raw_score: 27, overall_band: 6.5, reading_band: 6.5, listening_band: null, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 10*86400000).toISOString(), completed_at: new Date(Date.now() - 10*86400000 + 3600000).toISOString(), time_taken: 3600, total_questions: 40, correct_answers: 27 },
+              { id: 'att-l-2', user_id: userId, test_id: '3ea2cd99-05fa-442b-a8b2-800c45cc2cdf', test_type: 'listening', status: 'completed', raw_score: 35, overall_band: 8.0, reading_band: null, listening_band: 8.0, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 12*86400000).toISOString(), completed_at: new Date(Date.now() - 12*86400000 + 2400000).toISOString(), time_taken: 2400, total_questions: 40, correct_answers: 35 },
+              { id: 'att-fm-2', user_id: userId, test_id: 'f3b1ae22-c7c6-4da9-9500-506666b6f9d8', test_type: 'full_mock', status: 'in_progress', raw_score: null, overall_band: null, reading_band: null, listening_band: null, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 30*60000).toISOString(), completed_at: null, time_taken: null, total_questions: 80, correct_answers: null }
+            ];
+            // Filter by user_id if query has user_id filter
+            var uidMatch2 = search.match(/user_id=eq\.([a-z0-9\-]+)/i);
+            var statusMatch = search.match(/status=eq\.([a-z_]+)/i);
+            var tidMatch2 = search.match(/id=eq\.([a-f0-9\-]+)/i);
+            var typeMatch = search.match(/test_type=eq\.([a-z_]+)/i);
+            var filtered = mockAttempts;
+            if (uidMatch2) filtered = filtered.filter(function(a) { return a.user_id === uidMatch2[1]; });
+            if (statusMatch) filtered = filtered.filter(function(a) { return a.status === statusMatch[1]; });
+            if (tidMatch2) filtered = filtered.filter(function(a) { return a.id === tidMatch2[1]; });
+            if (typeMatch) filtered = filtered.filter(function(a) { return a.test_type === typeMatch[1]; });
+            // Always allow this to fall through to remote too for real data merging
+            return Promise.resolve(makeJsonResponse(filtered));
+          }
+
+          // 11d. speaking_ai_submissions — MyReports, ResultDetail, Leaderboard
+          if (tableName === 'speaking_ai_submissions' && method === 'GET') {
+            var isAdminSp = localStorage.getItem('mock_admin') === 'true';
+            var spUserId = isAdminSp ? 'admin-emran-id' : 'student-user-1';
+            return Promise.resolve(makeJsonResponse([
+              { id: 'sp-1', user_id: spUserId, test_id: 'b90afe10-6622-496d-8940-f2288adb462e', status: 'graded', band: 6.5, fluency_band: 6.5, lexical_band: 6.5, grammar_band: 7.0, pronunciation_band: 6.0, feedback: 'Good fluency with minor pronunciation issues. Work on complex grammar structures.', created_at: new Date(Date.now() - 5*86400000).toISOString() }
+            ]));
+          }
+
+          // 11e. writing_submissions — ResultDetail
+          if (tableName === 'writing_submissions' && method === 'GET') {
+            var isAdminWs = localStorage.getItem('mock_admin') === 'true';
+            var wsUserId = isAdminWs ? 'admin-emran-id' : 'student-user-1';
+            return Promise.resolve(makeJsonResponse([
+              { id: 'ws-1', user_id: wsUserId, attempt_id: 'att-w-1', task_number: 1, response_text: 'The bar chart illustrates the changes in renewable energy consumption over a decade.', band: 6.5, task_achievement: 6.5, coherence_band: 7.0, lexical_band: 6.5, grammar_band: 6.0, feedback: 'Good overview but needs more specific data references.', created_at: new Date(Date.now() - 6*86400000).toISOString() },
+              { id: 'ws-2', user_id: wsUserId, attempt_id: 'att-w-1', task_number: 2, response_text: 'Nowadays, many people argue that technology has transformed how we communicate.', band: 6.5, task_achievement: 6.5, coherence_band: 7.0, lexical_band: 6.5, grammar_band: 6.0, feedback: 'Clear argument but needs more developed examples.', created_at: new Date(Date.now() - 6*86400000).toISOString() }
+            ]));
           }
 
           // 12. Reading Passages (with embedded segments support)
