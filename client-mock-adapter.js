@@ -218,17 +218,179 @@
 
   // 11. Default Payment Partners & Settings
   var mockPaymentPartners = [
-    { id: "partner-bkash", name: "bKash Merchant", code: "bkash", is_active: true, logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
-    { id: "partner-nagad", name: "Nagad Direct", code: "nagad", is_active: true, logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
-    { id: "partner-stripe", name: "Stripe International", code: "stripe", is_active: true, logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" }
+    { id: "partner-bkash", name: "bKash (Domestic 🇧🇩)", code: "bkash", is_active: true, type: "domestic", currency: "BDT", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
+    { id: "partner-nagad", name: "Nagad (Domestic 🇧🇩)", code: "nagad", is_active: true, type: "domestic", currency: "BDT", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
+    { id: "partner-rocket", name: "Rocket DBBL (Domestic 🇧🇩)", code: "rocket", is_active: true, type: "domestic", currency: "BDT", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
+    { id: "partner-upay", name: "Upay (Domestic 🇧🇩)", code: "upay", is_active: true, type: "domestic", currency: "BDT", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
+    { id: "partner-cards", name: "Local Bank Cards (Visa/Mastercard 🇧🇩)", code: "cards", is_active: true, type: "domestic", currency: "BDT", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
+    { id: "partner-stripe", name: "Stripe International Cards (Overseas 🌍)", code: "stripe", is_active: true, type: "international", currency: "USD", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
+    { id: "partner-paypal", name: "PayPal Worldwide (Overseas 🌍)", code: "paypal", is_active: true, type: "international", currency: "USD", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" }
   ];
   var mockPaymentSettings = [{
     id: "settings-default",
     bkash_enabled: true,
     nagad_enabled: true,
+    rocket_enabled: true,
+    upay_enabled: true,
+    cards_enabled: true,
     stripe_enabled: true,
-    currency: "USD",
-    exchange_rate: 120.0
+    paypal_enabled: true,
+    currency: "both",
+    primary_currency: "BDT",
+    secondary_currency: "USD",
+    exchange_rate: 100.0
+  }];
+
+  var mockPackages = [
+    {
+      id: "f1",
+      name: "Unlimited — 1 Week",
+      description: "Full access to Cambridge practice tests, AI scoring, and all 4 IELTS modules.",
+      pricing_tiers: [],
+      features: [
+        "All Cambridge Practice Tests (Academic & General)",
+        "Instant AI Band Score & Criterion Breakdown",
+        "Full Reading & Listening Answer Explanations",
+        "Writing AI Evaluation with Band 9 Sample Answers",
+        "Speaking AI Simulator & Practice",
+        "Payment in ৳ BDT (bKash/Nagad/Rocket) or $ USD (Cards/Stripe/PayPal)"
+      ],
+      button_text: "Get 1 Week Pass",
+      button_style: "filled_orange",
+      badge_text: "STARTER",
+      badge_style: "blue",
+      original_price: null,
+      duration_label: "1 Week",
+      duration_days: 7,
+      price: 500,
+      price_usd: 5,
+      display_price: "৳500 / $5 USD",
+      currency: "BDT",
+      billing_cycle: "week",
+      is_active: true,
+      show_on_homepage: true,
+      sort_order: 1
+    },
+    {
+      id: "f2",
+      name: "Unlimited — 2 Weeks",
+      description: "Accelerate your exam readiness with 14 days of unlimited mock exams and evaluations.",
+      pricing_tiers: [],
+      features: [
+        "Everything in 1 Week Plan",
+        "Full Cambridge 1-19 Mock Test Collection",
+        "Personalized Weakness Analysis & Skill Radar",
+        "Priority AI Evaluation Queue",
+        "Payment in ৳ BDT (bKash/Nagad/Rocket) or $ USD (Cards/Stripe/PayPal)"
+      ],
+      button_text: "Get 2 Weeks Pass",
+      button_style: "filled_orange",
+      badge_text: "SAVE ৳250 / $3",
+      badge_style: "green",
+      original_price: 1000,
+      duration_label: "2 Weeks",
+      duration_days: 14,
+      price: 750,
+      price_usd: 7,
+      display_price: "৳750 / $7 USD",
+      currency: "BDT",
+      billing_cycle: "2 weeks",
+      is_active: true,
+      show_on_homepage: true,
+      sort_order: 2
+    },
+    {
+      id: "f3",
+      name: "Unlimited — 1 Month",
+      description: "Most popular plan for comprehensive preparation and guaranteed band score improvement.",
+      pricing_tiers: [],
+      features: [
+        "Everything in 2 Weeks Plan",
+        "Unlimited Full-Length Mock Exams & Retakes",
+        "Customized Band Score Target Roadmap",
+        "Speaking Partner Room & AI Tutor Sessions",
+        "Payment in ৳ BDT (bKash/Nagad/Rocket) or $ USD (Cards/Stripe/PayPal)"
+      ],
+      button_text: "Get 1 Month Pass",
+      button_style: "filled_orange",
+      badge_text: "POPULAR • SAVE ৳500 / $5",
+      badge_style: "purple",
+      original_price: 1500,
+      duration_label: "1 Month",
+      duration_days: 30,
+      price: 1000,
+      price_usd: 10,
+      display_price: "৳1,000 / $10 USD",
+      currency: "BDT",
+      billing_cycle: "month",
+      is_active: true,
+      show_on_homepage: true,
+      sort_order: 3
+    },
+    {
+      id: "f4",
+      name: "Unlimited — 2 Months",
+      description: "Complete mastery package designed for high target band scores (Band 7.5 - 8.5+).",
+      pricing_tiers: [],
+      features: [
+        "Everything in 1 Month Plan",
+        "Extended 60 Days Unlimited Exam Access",
+        "Full Speaking & Writing Band 9 Sample Library",
+        "24/7 Priority Support & Feedback Review",
+        "Payment in ৳ BDT (bKash/Nagad/Rocket) or $ USD (Cards/Stripe/PayPal)"
+      ],
+      button_text: "Get 2 Months Pass",
+      button_style: "filled_orange",
+      badge_text: "BEST VALUE • SAVE ৳500 / $5",
+      badge_style: "amber",
+      original_price: 2000,
+      duration_label: "2 Months",
+      duration_days: 60,
+      price: 1500,
+      price_usd: 15,
+      display_price: "৳1,500 / $15 USD",
+      currency: "BDT",
+      billing_cycle: "2 months",
+      is_active: true,
+      show_on_homepage: true,
+      sort_order: 4
+    }
+  ];
+
+  var mockSiteContent = [{
+    id: "site-content-main",
+    content: {
+      buyPackHeader: {
+        title: "Choose Your Plan",
+        subtitle: "Select the right preparation plan for your IELTS goals. Instant activation on all plans.",
+        titlePrefix: "Choose Your",
+        titleHighlight: "Plan",
+        titleSuffix: ""
+      },
+      comparisonTable: {
+        title: "Why Choose Our Platform Over Coaching Centers?",
+        subtitle: "See the clear difference between traditional coaching centers and TestLoom",
+        column1Header: "COACHING CENTER",
+        column2Header: "OUR PLATFORM",
+        rows: [
+          { aspect: "Cost & Pricing", col1: "৳15,000–৳20,000+ ($150–$200 USD) upfront", col2: "Starting from only ৳500 / $5 USD" },
+          { aspect: "Schedule & Flexibility", col1: "Hours wasted traveling in traffic", col2: "Practice anytime 24/7 from home or anywhere" },
+          { aspect: "Evaluation & Feedback", col1: "Generic, delayed feedback for all students", col2: "Instant AI analysis & band score breakdown" },
+          { aspect: "Speaking Practice", col1: "Limited speaking time, long waiting queues", col2: "1-on-1 AI & expert mock interview sessions" },
+          { aspect: "Progress Tracking", col1: "No systematic progress tracking", col2: "Real-time analytics dashboard & skill radar" },
+          { aspect: "Support", col1: "Assistance only during class hours", col2: "24/7 online support & expert study guidance" },
+          { aspect: "Payment & Access", col1: "Full non-refundable upfront payment", col2: "Flexible plans, cancel anytime, dual currency (BDT / USD)" }
+        ]
+      },
+      checkout: {
+        show_coupon: true,
+        currency: "both",
+        primary_currency: "BDT",
+        secondary_currency: "USD",
+        domestic_gateways: ["bKash", "Nagad", "Rocket", "Upay", "Local Bank Cards"],
+        international_gateways: ["Visa / Mastercard / Amex", "Stripe", "PayPal"]
+      }
+    }
   }];
 
   // 12. Default Admin Dashboard Overview Statistics
@@ -1402,7 +1564,25 @@
             return Promise.resolve(makeJsonResponse([]));
           }
           if (rpcName === 'get_gateway_public_config') {
-            return Promise.resolve(makeJsonResponse({ bkash: true, nagad: true, stripe: true }));
+            return Promise.resolve(makeJsonResponse({
+              is_enabled: true,
+              gateway_name: "testloom_multigateway",
+              currency: "both",
+              primary_currency: "BDT",
+              secondary_currency: "USD",
+              exchange_rate: 100,
+              bkash: true,
+              nagad: true,
+              rocket: true,
+              upay: true,
+              cards: true,
+              local_cards: true,
+              stripe: true,
+              paypal: true,
+              international_cards: true,
+              domestic_methods: ["bKash", "Nagad", "Rocket", "Upay", "Local Bank Cards"],
+              international_methods: ["Visa / Mastercard / Amex", "Stripe", "PayPal"]
+            }));
           }
           // Device limit
           if (rpcName === 'get_device_limit_overview') {
@@ -1467,6 +1647,38 @@
               templates: [{ id: "tpl-1", title: "Welcome SMS", body: "Welcome to TestLoom! Access your tests now." }],
               campaigns: [],
               contacts: []
+            }));
+          }
+
+          if (funcName === 'initiate-payment') {
+            var reqBody = (options && options.body) ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : {};
+            var orderId = reqBody.order_id || ('TL-' + Date.now());
+            var pkgId = reqBody.package_id || 'f1';
+            var callbackUrl = reqBody.callback_url || (window.location.origin + window.location.pathname + '#/payment-result?order_id=' + orderId + '&status=completed');
+
+            mockSubscriptions[0] = {
+              id: "sub-" + Date.now(),
+              user_id: (mockCurrentUser && mockCurrentUser.id) || "admin-emran-id",
+              status: "active",
+              package_id: pkgId,
+              starts_at: new Date().toISOString(),
+              expires_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+              packages: {
+                id: pkgId,
+                name: reqBody.product_name || "Unlimited Exam Pass",
+                max_reading_tests: -1,
+                max_listening_tests: -1,
+                max_writing_tests: -1,
+                max_mock_tests: -1,
+                max_speaking_sessions: -1
+              }
+            };
+
+            return Promise.resolve(makeJsonResponse({
+              ok: true,
+              success: true,
+              order_id: orderId,
+              checkout_url: callbackUrl
             }));
           }
 
@@ -1773,6 +1985,13 @@
             }]));
           }
 
+          if (tableName === 'packages' && method === 'GET') {
+            return Promise.resolve(makeJsonResponse(mockPackages));
+          }
+          if (tableName === 'site_content' && method === 'GET') {
+            return Promise.resolve(makeJsonResponse(mockSiteContent));
+          }
+
           // 11. empty collections that can block layouts
           if ((tableName === 'marketing_popups' || tableName === 'announcement_banners' || 
                tableName === 'dashboard_hero_banners' || tableName === 'user_notifications' || 
@@ -1783,7 +2002,7 @@
                tableName === 'reading_attempt_answers' || tableName === 'listening_attempt_answers' ||
                tableName === 'speaking_attempt_answers' || tableName === 'roadmap_tasks' ||
                tableName === 'roadmap_progress' || tableName === 'fox_token_transactions' ||
-               tableName === 'referrals' || tableName === 'packages' || tableName === 'billing_transactions' ||
+               tableName === 'referrals' || tableName === 'billing_transactions' ||
                tableName === 'notification_preferences' || tableName === 'student_notes' ||
                tableName === 'study_streaks' || tableName === 'vocab_sets' || tableName === 'vocab_progress' ||
                // Admin-only tables (all return empty for safety)
