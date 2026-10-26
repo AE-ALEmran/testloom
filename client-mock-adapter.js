@@ -1773,8 +1773,6 @@
         } else if (pathname.indexOf('/storage/v1/') !== -1) {
           pathname = pathname.slice(pathname.indexOf('/storage/v1/'));
         }
-        var parsedUrl = new URL(url);
-        var pathname = parsedUrl.pathname;
         var search = parsedUrl.search;
         var method = (init && init.method ? init.method : 'GET').toUpperCase();
 
