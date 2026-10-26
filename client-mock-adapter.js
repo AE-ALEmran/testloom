@@ -225,6 +225,171 @@
     { key: "homepage_hero_banner", enabled: false, label: "Hero Banner", description: "Rotating hero banners" }
   ];
 
+  // 11b. Default IELTS SEO Settings & Dynamic Page Overrides
+  var mockSeoSettings = {
+    id: "seo-settings-default",
+    brand_name: "TestLoom",
+    base_url: "https://ae-alemran.github.io/testloom",
+    default_title_template: "%s | TestLoom IELTS Mock Test",
+    default_description: "Take authentic IELTS Mock Tests online for Academic & General Training. Practice full computer-delivered Cambridge IELTS 10–20 tests with instant AI band scores, official listening audio, reading passages, writing evaluation, and 3-part speaking practice.",
+    default_og_image: "https://ae-alemran.github.io/testloom/social.webp",
+    default_twitter_card: "summary_large_image",
+    twitter_site: "@TestLoom",
+    default_robots: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+    organization_jsonld: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TestLoom",
+      "url": "https://ae-alemran.github.io/testloom/",
+      "logo": "https://ae-alemran.github.io/testloom/logo.png",
+      "description": "Premier online IELTS exam preparation platform offering computer-based mock tests, instant band scores, and AI performance analysis."
+    }),
+    website_jsonld: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TestLoom IELTS Mock Test",
+      "url": "https://ae-alemran.github.io/testloom/",
+      "inLanguage": "en",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://ae-alemran.github.io/testloom/practice?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }),
+    sitemap_enabled: true
+  };
+
+  var mockSeoPages = [
+    {
+      id: "seo-p-1",
+      route_pattern: "/",
+      title: "TestLoom - IELTS Mock Test Online | Free Cambridge Practice Tests",
+      description: "Practice authentic IELTS computer-based mock tests online for Academic and General Training. Full Cambridge 10-20 exam tests, instant band scores, and AI feedback.",
+      canonical: "https://ae-alemran.github.io/testloom/",
+      og_title: "TestLoom - IELTS Mock Test Online | Free Cambridge Practice Tests",
+      og_description: "Practice authentic IELTS computer-based mock tests online for Academic and General Training. Full Cambridge 10-20 exam tests, instant band scores, and AI feedback.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-2",
+      route_pattern: "/practice",
+      title: "IELTS Practice Tests Online - Academic & General Training Mock Tests",
+      description: "Take full-length IELTS practice tests online. Includes Cambridge IELTS Books 10-20, reading passages, listening audio tests, writing tasks, and speaking sessions.",
+      canonical: "https://ae-alemran.github.io/testloom/practice",
+      og_title: "IELTS Practice Tests Online - Academic & General Training Mock Tests",
+      og_description: "Take full-length IELTS practice tests online with Cambridge IELTS Books 10-20 and TestLoom authentic diagnostic suites.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-3",
+      route_pattern: "/practice/full-mock",
+      title: "IELTS Full Mock Test Simulator - Timed Computer-Delivered Exam",
+      description: "Experience authentic 2.5-hour computer-delivered IELTS full mock tests covering Listening, Reading, and Writing with real-time scoring and band evaluation.",
+      canonical: "https://ae-alemran.github.io/testloom/practice/full-mock",
+      og_title: "IELTS Full Mock Test Simulator - Timed Computer-Delivered Exam",
+      og_description: "Full 2.5-hour timed computer-based IELTS mock test simulation for Academic and General Training.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-4",
+      route_pattern: "/practice/reading",
+      title: "IELTS Reading Mock Test Online - Academic & General Training Passages",
+      description: "Practice 40-question IELTS reading mock tests with True/False/Not Given, Headings, and Summary completion. Instant band score calculation and explanations.",
+      canonical: "https://ae-alemran.github.io/testloom/practice/reading",
+      og_title: "IELTS Reading Mock Test Online - Academic & General Training Passages",
+      og_description: "Practice 40-question IELTS reading mock tests with instant band score calculation.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-5",
+      route_pattern: "/practice/listening",
+      title: "IELTS Listening Practice Tests Online - Audio & Question Transcripts",
+      description: "Realistic 40-question IELTS listening mock tests across Parts 1-4 with audio playback, full transcripts, and instant band scoring.",
+      canonical: "https://ae-alemran.github.io/testloom/practice/listening",
+      og_title: "IELTS Listening Practice Tests Online - Audio & Question Transcripts",
+      og_description: "Realistic 40-question IELTS listening mock tests with audio playback and transcripts.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-6",
+      route_pattern: "/practice/writing",
+      title: "IELTS Writing Practice - Task 1 Report & Task 2 Essay Evaluation",
+      description: "Practice official IELTS Academic and General Training writing prompts with timed test simulations, band 9 model answers, and evaluation criteria.",
+      canonical: "https://ae-alemran.github.io/testloom/practice/writing",
+      og_title: "IELTS Writing Practice - Task 1 Report & Task 2 Essay Evaluation",
+      og_description: "Official IELTS Academic & General Training writing prompts with timed test simulator and band 9 criteria.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-7",
+      route_pattern: "/speaking",
+      title: "IELTS Speaking Practice Online - 3-Part AI Interview Simulation",
+      description: "Complete authentic IELTS Speaking test simulations covering Part 1 interview, Part 2 cue card with 1-minute preparation timer, and Part 3 abstract discussion.",
+      canonical: "https://ae-alemran.github.io/testloom/speaking",
+      og_title: "IELTS Speaking Practice Online - 3-Part AI Interview Simulation",
+      og_description: "Authentic 3-part IELTS Speaking test simulator with real timers, cue cards, and audio recorder.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    },
+    {
+      id: "seo-p-8",
+      route_pattern: "/free-trial",
+      title: "Free IELTS Mock Test Online - Diagnostic Test & Instant Band Score",
+      description: "Take a free online IELTS diagnostic mock test with instant scoring. No credit card required. Test your current IELTS band level today.",
+      canonical: "https://ae-alemran.github.io/testloom/free-trial",
+      og_title: "Free IELTS Mock Test Online - Diagnostic Test & Instant Band Score",
+      og_description: "Take an authentic free IELTS mock test online. Check your IELTS band score instantly.",
+      og_image: "https://ae-alemran.github.io/testloom/social.webp",
+      og_type: "website",
+      twitter_card: "summary_large_image",
+      robots_directives: "index, follow",
+      noindex: false,
+      nofollow: false,
+      updated_at: "2026-10-26T00:00:00Z"
+    }
+  ];
+
   // 11. Default Payment Partners & Settings
   var mockPaymentPartners = [
     { id: "partner-bkash", name: "bKash (Domestic 🇧🇩)", code: "bkash", is_active: true, type: "domestic", currency: "BDT", logo_url: basePath + "assets/payment-partners-CBfV9xnV.webp" },
@@ -2325,6 +2490,89 @@
             return Promise.resolve(makeJsonResponse(mockSiteSettings));
           }
 
+          // 1b. seo_settings (dynamic site branding & SEO configuration)
+          if (tableName === 'seo_settings') {
+            if (method === 'GET') {
+              var localSeo = getLocalTable('seo_settings');
+              var currentSettings = (localSeo.length > 0) ? Object.assign({}, mockSeoSettings, localSeo[0]) : mockSeoSettings;
+              return Promise.resolve(makeJsonResponse([currentSettings]));
+            }
+            if (method === 'PATCH' || method === 'PUT') {
+              var updateBody = {};
+              try { updateBody = typeof init.body === 'string' ? JSON.parse(init.body) : (init.body || {}); } catch(e) {}
+              var localSeoList = getLocalTable('seo_settings');
+              var baseSeo = (localSeoList.length > 0) ? localSeoList[0] : mockSeoSettings;
+              var updatedSeo = Object.assign({}, baseSeo, updateBody);
+              saveLocalTable('seo_settings', [updatedSeo]);
+              return Promise.resolve(makeJsonResponse([updatedSeo]));
+            }
+          }
+
+          // 1c. seo_pages (dynamic page metadata overrides for high-ranking Google SEO)
+          if (tableName === 'seo_pages') {
+            if (method === 'GET') {
+              var localPages = getLocalTable('seo_pages');
+              var mergedPages = mockSeoPages.slice();
+              if (localPages.length > 0) {
+                var pMap = {};
+                localPages.forEach(function(p) { if (p && p.id) pMap[p.id] = p; });
+                mergedPages = mergedPages.map(function(p) { return pMap[p.id] ? Object.assign({}, p, pMap[p.id]) : p; });
+                localPages.forEach(function(p) {
+                  if (p && p.id && !mergedPages.some(function(mp) { return mp.id === p.id; })) {
+                    mergedPages.push(p);
+                  }
+                });
+              }
+              var rpMatch = search.match(/route_pattern=eq\.([^&]+)/i);
+              if (rpMatch) {
+                var targetRoute = decodeURIComponent(rpMatch[1]);
+                var matchedPage = mergedPages.filter(function(p) { return p.route_pattern === targetRoute; });
+                return Promise.resolve(makeJsonResponse(matchedPage));
+              }
+              return Promise.resolve(makeJsonResponse(mergedPages));
+            }
+            if (method === 'POST') {
+              var newPage = {};
+              try { newPage = typeof init.body === 'string' ? JSON.parse(init.body) : (init.body || {}); } catch(e) {}
+              if (!newPage.id) newPage.id = 'seo-p-' + Date.now();
+              newPage.updated_at = new Date().toISOString();
+              var curPages = getLocalTable('seo_pages');
+              curPages.push(newPage);
+              saveLocalTable('seo_pages', curPages);
+              return Promise.resolve(makeJsonResponse([newPage], 201));
+            }
+            if (method === 'PATCH' || method === 'PUT') {
+              var patchBody = {};
+              try { patchBody = typeof init.body === 'string' ? JSON.parse(init.body) : (init.body || {}); } catch(e) {}
+              var pIdMatch = search.match(/id=eq\.([a-zA-Z0-9_\-]+)/i);
+              var targetPageId = pIdMatch ? pIdMatch[1] : (patchBody.id || '');
+              var allPages = getLocalTable('seo_pages');
+              var foundP = false;
+              allPages = allPages.map(function(p) {
+                if (p.id === targetPageId) {
+                  foundP = true;
+                  return Object.assign({}, p, patchBody, { updated_at: new Date().toISOString() });
+                }
+                return p;
+              });
+              if (!foundP && targetPageId) {
+                var defaultP = mockSeoPages.find(function(p) { return p.id === targetPageId; }) || {};
+                allPages.push(Object.assign({}, defaultP, patchBody, { id: targetPageId, updated_at: new Date().toISOString() }));
+              }
+              saveLocalTable('seo_pages', allPages);
+              return Promise.resolve(makeJsonResponse([patchBody]));
+            }
+            if (method === 'DELETE') {
+              var delMatch = search.match(/id=eq\.([a-zA-Z0-9_\-]+)/i);
+              if (delMatch) {
+                var delId = delMatch[1];
+                var remaining = getLocalTable('seo_pages').filter(function(p) { return p.id !== delId; });
+                saveLocalTable('seo_pages', remaining);
+              }
+              return Promise.resolve(makeJsonResponse([], 204));
+            }
+          }
+
           // 2. admin_security_settings
           if (tableName === 'admin_security_settings' && method === 'GET') {
             return Promise.resolve(makeJsonResponse(mockAdminSecuritySettings));
@@ -2462,8 +2710,7 @@
                tableName === 'referral_settings' || tableName === 'roadmap_days' ||
                tableName === 'security_settings' || tableName === 'security_settings_backups' ||
                tableName === 'seo_audit_findings' || tableName === 'seo_audit_runs' ||
-               tableName === 'seo_pages' || tableName === 'seo_redirects' ||
-               tableName === 'seo_settings' || tableName === 'site_content' ||
+               tableName === 'seo_redirects' || tableName === 'site_content' ||
                tableName === 'sms_campaigns' || tableName === 'sms_contacts' ||
                tableName === 'sms_recipients' || tableName === 'sms_replies' ||
                tableName === 'sms_sender_ids' || tableName === 'sms_settings' ||

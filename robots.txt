@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /care/
 
-Sitemap: http://localhost:8000/sitemap.xml
+Sitemap: https://ae-alemran.github.io/testloom/sitemap.xml
