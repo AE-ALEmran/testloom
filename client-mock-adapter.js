@@ -160,7 +160,16 @@
   ];
 
   // 7. Default Free Trial Tests (17 tests)
-  var mockFreeTrialTests = [
+    var mockFreeTrialTests = [
+    { id: "free-sample-fm-acad", test_id: "sample-full-mock-academic", test_type: "full_mock", display_order: 0 },
+    { id: "free-sample-fm-gt", test_id: "sample-full-mock-gt", test_type: "full_mock", display_order: 1 },
+    { id: "free-sample-read-acad", test_id: "sample-reading-academic-1", test_type: "reading", display_order: 0 },
+    { id: "free-sample-read-gt", test_id: "sample-reading-gt-1", test_type: "reading", display_order: 1 },
+    { id: "free-sample-list-1", test_id: "sample-listening-1", test_type: "listening", display_order: 0 },
+    { id: "free-sample-write-acad", test_id: "sample-writing-academic-1", test_type: "writing", display_order: 0 },
+    { id: "free-sample-write-gt", test_id: "sample-writing-gt-1", test_type: "writing", display_order: 1 },
+    { id: "free-sample-spk-1", test_id: "sample-speaking-1", test_type: "speaking", display_order: 0 },
+    { id: "free-sample-spk-2", test_id: "sample-speaking-2", test_type: "speaking", display_order: 1 },
     { id: "f14b8c68-7071-473d-8707-949d23900fcf", test_id: "c3454b1e-6a91-44e7-a4b7-87cca312c1dd", test_type: "full_mock", display_order: 0 },
     { id: "c4d1a331-6653-499d-986c-c8b108188da2", test_id: "f3b1ae22-c7c6-4da9-9500-506666b6f9d8", test_type: "full_mock", display_order: 1 },
     { id: "9cb791c7-7a9e-408f-a66b-1b142da97170", test_id: "629ff382-63d2-434d-8c39-50c67fd75d1e", test_type: "full_mock", display_order: 2 },
@@ -446,6 +455,7 @@
     var reading = [];
     var listening = [];
     var writing = [];
+    var speaking = [];
     var fullMock = [];
 
     books.forEach(function(b) {
@@ -500,6 +510,22 @@
           series: "cambridge",
           admin_only: false,
           instructions: []
+        });
+
+        // 3b. Speaking Test (Full 3-Part authentic interview)
+        speaking.push({
+          id: "cambridge-" + b + "-speaking-" + t,
+          title: "Cambridge " + b + " Speaking Test " + t,
+          test_number: t,
+          cambridge_book: b,
+          test_mode_type: "full",
+          difficulty: b >= 17 ? "hard" : "medium",
+          target_band: "7.0+",
+          ai_status: "published",
+          is_active: true,
+          created_at: "2026-01-01T00:00:00Z",
+          series: "cambridge",
+          admin_only: false
         });
 
         // 4. Academic Full Mock
@@ -574,10 +600,201 @@
       }
     });
 
+    // Sample Test Suites (TestLoom / Sample Series - Series: "puropuro")
+    var sampleReadingTests = [
+      {
+        id: "sample-reading-academic-1",
+        title: "Official IELTS Academic Reading Diagnostic Test 1",
+        total_questions: 40,
+        total_time: 60,
+        is_active: true,
+        difficulty: "medium",
+        test_type: "academic",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      },
+      {
+        id: "sample-reading-academic-2",
+        title: "Official IELTS Academic Reading Practice Test 2",
+        total_questions: 40,
+        total_time: 60,
+        is_active: true,
+        difficulty: "hard",
+        test_type: "academic",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      },
+      {
+        id: "sample-reading-gt-1",
+        title: "Official IELTS General Training Reading Sample Test 1",
+        total_questions: 40,
+        total_time: 60,
+        is_active: true,
+        difficulty: "medium",
+        test_type: "general_training",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      }
+    ];
+
+    var sampleListeningTests = [
+      {
+        id: "sample-listening-1",
+        title: "Official IELTS Listening Diagnostic Test 1",
+        total_questions: 40,
+        total_time: 40,
+        is_active: true,
+        book_number: 1,
+        test_number: 1,
+        test_type: "academic",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      },
+      {
+        id: "sample-listening-2",
+        title: "Official IELTS Listening Practice Test 2",
+        total_questions: 40,
+        total_time: 40,
+        is_active: true,
+        book_number: 1,
+        test_number: 2,
+        test_type: "academic",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      }
+    ];
+
+    var sampleWritingTests = [
+      {
+        id: "sample-writing-academic-1",
+        title: "Official IELTS Academic Writing Sample Test 1",
+        total_questions: 2,
+        total_time: 60,
+        is_active: true,
+        difficulty: "medium",
+        test_type: "academic",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      },
+      {
+        id: "sample-writing-gt-1",
+        title: "Official IELTS General Training Writing Sample Test 1",
+        total_questions: 2,
+        total_time: 60,
+        is_active: true,
+        difficulty: "medium",
+        test_type: "general_training",
+        series: "puropuro",
+        admin_only: false,
+        instructions: []
+      }
+    ];
+
+    var sampleSpeakingTests = [
+      {
+        id: "sample-speaking-1",
+        title: "Official IELTS Speaking Diagnostic Test 1 — Work, Study & Memorable Journeys",
+        test_mode_type: "full",
+        difficulty: "medium",
+        target_band: "7.5+",
+        ai_status: "published",
+        is_active: true,
+        created_at: "2026-01-01T00:00:00Z",
+        test_number: 1,
+        series: "puropuro",
+        admin_only: false
+      },
+      {
+        id: "sample-speaking-2",
+        title: "Official IELTS Speaking Practice Test 2 — Hometown, Cultural Traditions & Technology",
+        test_mode_type: "full",
+        difficulty: "medium",
+        target_band: "7.5+",
+        ai_status: "published",
+        is_active: true,
+        created_at: "2026-01-01T00:00:00Z",
+        test_number: 2,
+        series: "puropuro",
+        admin_only: false
+      },
+      {
+        id: "sample-speaking-3",
+        title: "Official IELTS Speaking Practice Test 3 — Environmental Protection & Modern Cities",
+        test_mode_type: "full",
+        difficulty: "medium",
+        target_band: "7.0+",
+        ai_status: "published",
+        is_active: true,
+        created_at: "2026-01-01T00:00:00Z",
+        test_number: 3,
+        series: "puropuro",
+        admin_only: false
+      },
+      {
+        id: "sample-speaking-4",
+        title: "Official IELTS Speaking Practice Test 4 — Artificial Intelligence & Future Education",
+        test_mode_type: "full",
+        difficulty: "hard",
+        target_band: "8.0+",
+        ai_status: "published",
+        is_active: true,
+        created_at: "2026-01-01T00:00:00Z",
+        test_number: 4,
+        series: "puropuro",
+        admin_only: false
+      }
+    ];
+
+    var sampleFullMockTests = [
+      {
+        id: "sample-full-mock-academic",
+        title: "Official IELTS Academic Diagnostic Full Mock 1",
+        description: "Complete authentic IELTS Academic exam simulation with timed Listening, Reading, and Writing modules.",
+        reading_test_id: "sample-reading-academic-1",
+        listening_test_id: "sample-listening-1",
+        writing_test_id: "sample-writing-academic-1",
+        speaking_test_id: "sample-speaking-1",
+        test_order: ["listening", "reading", "writing"],
+        total_time: 150,
+        is_active: true,
+        test_type: "academic",
+        series: "puropuro",
+        admin_only: false
+      },
+      {
+        id: "sample-full-mock-gt",
+        title: "Official IELTS General Training Full Mock 1",
+        description: "Complete authentic IELTS General Training exam simulation with timed Listening, Reading, and Writing modules.",
+        reading_test_id: "sample-reading-gt-1",
+        listening_test_id: "sample-listening-1",
+        writing_test_id: "sample-writing-gt-1",
+        speaking_test_id: "sample-speaking-2",
+        test_order: ["listening", "reading", "writing"],
+        total_time: 150,
+        is_active: true,
+        test_type: "general_training",
+        series: "puropuro",
+        admin_only: false
+      }
+    ];
+
+    reading = reading.concat(sampleReadingTests);
+    listening = listening.concat(sampleListeningTests);
+    writing = writing.concat(sampleWritingTests);
+    speaking = speaking.concat(sampleSpeakingTests);
+    fullMock = fullMock.concat(sampleFullMockTests);
+
     return {
       reading_tests: reading,
       listening_tests: listening,
       writing_tests: writing,
+      speaking_tests: speaking,
       full_mock_tests: fullMock
     };
   })();
@@ -1159,6 +1376,191 @@
       questions: questions,
       configs: configs,
       segments: segments
+    };
+  }
+
+  // =========================================================================
+  // IELTS Speaking Suite Generator (Part 1, Part 2 Cue Card & Part 3)
+  // =========================================================================
+  function generateIeltsSpeakingData(testId) {
+    var topicIndex = 0;
+    if (typeof testId === 'string') {
+      var numMatch = testId.match(/(\d+)/);
+      if (numMatch) {
+        topicIndex = parseInt(numMatch[1], 10) % 4;
+      } else {
+        var sum = 0;
+        for (var c = 0; c < testId.length; c++) sum += testId.charCodeAt(c);
+        topicIndex = sum % 4;
+      }
+    }
+
+    var speakingTopics = [
+      {
+        theme: "Work, Studies & Memorable Journeys",
+        p1Topic: "Hometown, Studies & Technology Habits",
+        p1Questions: [
+          "Let's talk about your hometown. Where is your hometown located and what is it known for?",
+          "What do you like most about living in your hometown or current city?",
+          "Has your hometown changed significantly in recent years?",
+          "Now let's discuss technology. How often do you use digital devices in your daily studies or work?",
+          "Do you think artificial intelligence will replace human tasks in the near future?"
+        ],
+        p2Title: "Part 2: Long Turn (Cue Card)",
+        p2Topic: "A Memorable Journey by Public Transport",
+        p2CueCard: "Describe a memorable journey you took by public transport.\n\nYou should say:\n• where you went and what transport you took\n• who was with you on this journey\n• what happened during the trip\nand explain why this journey was so memorable for you.",
+        p3Topic: "Public Transportation, Urban Mobility & Future Infrastructure",
+        p3Questions: [
+          "Why do many people still prefer private vehicles over public transport despite heavy traffic?",
+          "What measures can city authorities take to encourage more commuters to use mass transit systems?",
+          "How have modern high-speed railway networks impacted regional economic development?",
+          "Do you believe driverless autonomous trains and buses will completely replace human drivers?",
+          "In what ways might global travel habits need to adjust to combat climate change?"
+        ]
+      },
+      {
+        theme: "Hometown, Cultural Traditions & Daily Routines",
+        p1Topic: "Daily Routine, Leisure & Cultural Celebrations",
+        p1Questions: [
+          "What is your typical morning routine on a normal weekday?",
+          "Do you prefer spending your free time outdoors or relaxing indoors? Why?",
+          "What is a major traditional festival or celebration in your country?",
+          "How do people in your family usually celebrate special occasions?",
+          "Do you think young people today celebrate traditional holidays differently from older generations?"
+        ],
+        p2Title: "Part 2: Long Turn (Cue Card)",
+        p2Topic: "A Traditional Celebration or Event You Enjoyed",
+        p2CueCard: "Describe a traditional celebration or cultural festival you attended.\n\nYou should say:\n• what the festival was and where it took place\n• who you attended it with\n• what activities and customs occurred during the event\nand explain how you felt about participating in this celebration.",
+        p3Topic: "Preserving Cultural Heritage in a Globalized Society",
+        p3Questions: [
+          "Why is it important for nations to preserve their historic cultural traditions?",
+          "How has international media and globalization influenced local cultural celebrations?",
+          "Should governments allocate public funding to preserve historic sites and folk arts?",
+          "In what ways can schools teach younger generations to appreciate their cultural roots?",
+          "Do you think traditional celebrations will remain relevant fifty years from now?"
+        ]
+      },
+      {
+        theme: "Environmental Protection & Modern Cities",
+        p1Topic: "Parks, Green Spaces & Nature",
+        p1Questions: [
+          "Are there many parks or public gardens near where you live?",
+          "How often do you visit natural environments like forests or lakes?",
+          "What kind of outdoor activities do people in your region enjoy doing?",
+          "Do you think it is important for children to learn about nature at school?",
+          "Have you ever participated in any tree planting or environmental clean-up activity?"
+        ],
+        p2Title: "Part 2: Long Turn (Cue Card)",
+        p2Topic: "An Environmental Project or Green Space",
+        p2CueCard: "Describe an environmental project, community garden, or park you know about.\n\nYou should say:\n• where this project or park is situated\n• what features or green spaces it contains\n• how local residents make use of it\nand explain why this initiative is beneficial for the local community.",
+        p3Topic: "Urban Sustainability & Climate Change Responsibility",
+        p3Questions: [
+          "How do green spaces and urban forests contribute to the physical and mental health of city residents?",
+          "Whose responsibility is it to combat urban air pollution — governments, corporations, or individuals?",
+          "What are the main obstacles developing cities face when trying to build eco-friendly infrastructure?",
+          "How can architecture incorporate sustainable designs to reduce energy consumption in buildings?",
+          "Do you think international climate agreements are being implemented effectively worldwide?"
+        ]
+      },
+      {
+        theme: "Artificial Intelligence, Communication & Future Education",
+        p1Topic: "Online Learning, Reading Habits & Communication",
+        p1Questions: [
+          "Do you prefer reading physical printed books or digital e-books on a screen? Why?",
+          "How often do you communicate with friends through instant messaging compared to phone calls?",
+          "What kinds of websites or mobile applications do you find most useful for your studies?",
+          "Have you ever completed an online course or educational webinar?",
+          "What are the benefits of having instant access to information on smartphones?"
+        ],
+        p2Title: "Part 2: Long Turn (Cue Card)",
+        p2Topic: "A Useful Website or App that Helped You Learn",
+        p2CueCard: "Describe an educational website or mobile app that helped you learn something new.\n\nYou should say:\n• what the website or application is\n• how you first discovered it\n• what specific skills or knowledge you learned from it\nand explain why you found it particularly helpful.",
+        p3Topic: "The Future of Education & Artificial Intelligence",
+        p3Questions: [
+          "How is artificial intelligence transforming classroom learning and personalized education?",
+          "Do you think automated AI tutors could ever completely replace human teachers?",
+          "What are the potential drawbacks of students relying heavily on internet search engines for assignments?",
+          "How should university education adapt to prepare graduates for jobs in the age of automation?",
+          "Is digital literacy becoming more critical than traditional academic subjects for future careers?"
+        ]
+      }
+    ];
+
+    var topic = speakingTopics[topicIndex];
+    var p1Id = testId + "-part-1";
+    var p2Id = testId + "-part-2";
+    var p3Id = testId + "-part-3";
+
+    var parts = [
+      {
+        id: p1Id,
+        test_id: testId,
+        part_number: 1,
+        title: "Part 1: Introduction & Interview",
+        topic: topic.p1Topic,
+        cue_card_text: null,
+        prep_time_seconds: 0
+      },
+      {
+        id: p2Id,
+        test_id: testId,
+        part_number: 2,
+        title: topic.p2Title,
+        topic: topic.p2Topic,
+        cue_card_text: topic.p2CueCard,
+        prep_time_seconds: 60
+      },
+      {
+        id: p3Id,
+        test_id: testId,
+        part_number: 3,
+        title: "Part 3: Two-Way Discussion",
+        topic: topic.p3Topic,
+        cue_card_text: null,
+        prep_time_seconds: 0
+      }
+    ];
+
+    var questions = [];
+    var qNum = 1;
+
+    // Part 1 Questions (5 items)
+    topic.p1Questions.forEach(function(qText) {
+      questions.push({
+        id: testId + "-sp-q-" + qNum,
+        test_id: testId,
+        part_id: p1Id,
+        question_number: qNum,
+        question_text: qText
+      });
+      qNum++;
+    });
+
+    // Part 2 Question / Prompt (1 item)
+    questions.push({
+      id: testId + "-sp-q-" + qNum,
+      test_id: testId,
+      part_id: p2Id,
+      question_number: qNum,
+      question_text: "You have 1 minute to prepare your notes on the cue card topic above. Speak for 1 to 2 minutes when the timer begins."
+    });
+    qNum++;
+
+    // Part 3 Questions (5 items)
+    topic.p3Questions.forEach(function(qText) {
+      questions.push({
+        id: testId + "-sp-q-" + qNum,
+        test_id: testId,
+        part_id: p3Id,
+        question_number: qNum,
+        question_text: qText
+      });
+      qNum++;
+    });
+
+    return {
+      parts: parts,
+      questions: questions
     };
   }
 
@@ -1835,8 +2237,8 @@
             // PATCH / PUT (Update)
             if (method === 'PATCH' || method === 'PUT') {
               var updatePatch = bodyData || {};
-              var idMatch = search.match(/id=eq\.([a-f0-9\-]+)/i);
-              var testIdMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+              var idMatch = search.match(/id=eq\.([a-zA-Z0-9_\-]+)/i);
+              var testIdMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
               var updatedRows = [];
 
               if (idMatch) {
@@ -1878,8 +2280,8 @@
 
             // DELETE
             if (method === 'DELETE') {
-              var delIdMatch = search.match(/id=eq\.([a-f0-9\-]+)/i);
-              var delTestIdMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+              var delIdMatch = search.match(/id=eq\.([a-zA-Z0-9_\-]+)/i);
+              var delTestIdMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
 
               if (delIdMatch) {
                 var delId = delIdMatch[1];
@@ -2112,7 +2514,7 @@
             // Filter by user_id if query has user_id filter
             var uidMatch2 = search.match(/user_id=eq\.([a-z0-9\-]+)/i);
             var statusMatch = search.match(/status=eq\.([a-z_]+)/i);
-            var tidMatch2 = search.match(/id=eq\.([a-f0-9\-]+)/i);
+            var tidMatch2 = search.match(/id=eq\.([a-zA-Z0-9_\-]+)/i);
             var typeMatch = search.match(/test_type=eq\.([a-z_]+)/i);
             var filtered = mockAttempts;
             if (uidMatch2) filtered = filtered.filter(function(a) { return a.user_id === uidMatch2[1]; });
@@ -2142,9 +2544,43 @@
             ]));
           }
 
+          // 11f. Speaking Test Parts (Part 1, Part 2 Cue Card, Part 3)
+          if (tableName === 'speaking_test_parts' && method === 'GET') {
+            var stpMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
+            var reqStpId = stpMatch ? stpMatch[1] : "";
+            var localStp = getLocalTable('speaking_test_parts').filter(function(p) {
+              return !reqStpId || p.test_id === reqStpId;
+            });
+            if (localStp.length > 0) {
+              return Promise.resolve(makeJsonResponse(localStp));
+            }
+            if (reqStpId) {
+              var spData = generateIeltsSpeakingData(reqStpId);
+              return Promise.resolve(makeJsonResponse(spData.parts));
+            }
+            return Promise.resolve(makeJsonResponse([]));
+          }
+
+          // 11g. Speaking Test Questions
+          if (tableName === 'speaking_test_questions' && method === 'GET') {
+            var stqMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
+            var reqStqId = stqMatch ? stqMatch[1] : "";
+            var localStq = getLocalTable('speaking_test_questions').filter(function(q) {
+              return !reqStqId || q.test_id === reqStqId;
+            });
+            if (localStq.length > 0) {
+              return Promise.resolve(makeJsonResponse(localStq));
+            }
+            if (reqStqId) {
+              var spData2 = generateIeltsSpeakingData(reqStqId);
+              return Promise.resolve(makeJsonResponse(spData2.questions));
+            }
+            return Promise.resolve(makeJsonResponse([]));
+          }
+
           // 12. Reading Passages (with embedded segments support)
           if (tableName === 'reading_passages' && method === 'GET') {
-            var tIdMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var tIdMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqTestId = tIdMatch ? tIdMatch[1] : "";
             var localPassages = getLocalTable('reading_passages').filter(function(p) {
               return !reqTestId || p.test_id === reqTestId;
@@ -2160,43 +2596,55 @@
               return Promise.resolve(makeJsonResponse(fullPassages));
             }
 
-            // Fallback: Default 3 Reading Passages for the test
+                        // Fallback: Default 3 Authentic Reading Passages for the test (Paragraphs A-G)
             if (reqTestId) {
               var defaultPassages = [
                 {
                   id: reqTestId + "-passage-1",
                   test_id: reqTestId,
                   order: 1,
-                  title: "Reading Passage 1",
-                  description: "You should spend about 20 minutes on Questions 1–13.",
+                  title: "Reading Passage 1: The Evolution and Engineering of Urban Vertical Farming",
+                  description: "You should spend about 20 minutes on Questions 1–13, which are based on Reading Passage 1 below.",
                   segments: [
-                    { id: reqTestId + "-s1-a", label: "A", content: "The development of modern agriculture has transformed societies around the world, providing sustenance for billions while presenting environmental challenges." },
-                    { id: reqTestId + "-s1-b", label: "B", content: "Historical records show that early agrarian communities utilized sophisticated irrigation networks to maximize crop yields across diverse climates." },
-                    { id: reqTestId + "-s1-c", label: "C", content: "Contemporary researchers emphasize the importance of sustainable cultivation techniques that protect soil biodiversity and conserve freshwater resources." }
+                    { id: reqTestId + "-s1-a", label: "A", content: "The global agricultural sector faces an unprecedented confluence of crises: arable land degradation, worsening water scarcity, and a projected global population exceeding nine billion by mid-century. Traditional soil-based farming methods consume approximately seventy percent of available freshwater withdrawals and contribute heavily to deforestation and greenhouse gas emissions. In response to these structural bottlenecks, agricultural engineers and urban architects have developed controlled-environment vertical agriculture—a methodology that stacks cultivation layers upward within high-density metropolitan buildings." },
+                    { id: reqTestId + "-s1-b", label: "B", content: "Historically, the conceptual foundations of vertical farming date back to ancient hanging gardens and mid-twentieth-century hydroponic research. However, early commercial ventures struggled with prohibitive electricity costs and crude artificial lighting. The economic paradigm began shifting dramatically over the last decade with the advent of solid-state light-emitting diode (LED) arrays. Modern horticultural LEDs can be finely tuned to specific photosynthetically active radiation (PAR) spectra, particularly deep red and royal blue wavelengths, which dramatically accelerate vegetative growth while halving electricity consumption." },
+                    { id: reqTestId + "-s1-c", label: "C", content: "Water conservation represents perhaps the most dramatic operational triumph of closed-loop vertical systems. Utilizing aeroponic or nutrient-film hydroponic irrigation, roots are periodically misted with precise mineral formulations rather than submerged in standing reservoirs. Transpiration vapor released by crops is captured by industrial dehumidifiers, re-condensed, sanitized via ultraviolet filtration, and recirculated back into the nutrient cycle. As a result, commercial vertical facilities require up to ninety-five percent less water than conventional outdoor field farming to produce an equivalent biomass." },
+                    { id: reqTestId + "-s1-d", label: "D", content: "Despite these compelling agronomic advantages, commercial skeptics highlight substantial capital expenditure requirements. Building a multi-tier vertical farming facility demands specialized HVAC temperature regulating units, automated seeding conveyors, robotic harvesting gantries, and computer-vision disease surveillance cameras. A single commercial facility can cost tens of millions of dollars to construct. Nevertheless, proponents argue that year-round, weather-independent yield cycles—producing up to thirty harvest rotations annually per footprint compared to two or three in soil—justify the upfront capital allocation." },
+                    { id: reqTestId + "-s1-e", label: "E", content: "A further compelling dimension concerns food safety and chemical contamination. In completely sealed indoor environments, biological pest pressures from insects, fungi, and airborne weeds are virtually eliminated. Consequently, vertical produce requires zero synthetic chemical pesticides, herbicides, or fungicides. Furthermore, municipal wastewater runoff and heavy metal soil contamination are entirely bypassed, ensuring higher microbiological purity standards that appeal strongly to health-conscious metropolitan consumers." },
+                    { id: reqTestId + "-s1-f", label: "F", content: "Urban spatial planning is also undergoing transformation through agricultural retrofitting. Rather than constructing purpose-built towers from scratch, innovative developers are converting abandoned industrial warehouses, decommissioned subterranean bomb shelters, and vacant downtown corporate office floors into productive indoor farms. This spatial repurposing breathes economic vitality into blighted urban districts while drastically compressing food supply chains from thousands of transit miles down to mere city blocks." },
+                    { id: reqTestId + "-s1-g", label: "G", content: "Looking forward, the long-term viability of vertical agriculture depends on its technological integration with municipal smart grids and localized renewable energy sources. Pairing vertical facilities with on-site rooftop solar arrays, waste-heat recapture systems, and dynamic off-peak electricity tariffs significantly improves profit margins. As global climate volatility increasingly disrupts field agriculture, vertical farming will inevitably transition from an experimental niche into an indispensable cornerstone of urban food security." }
                   ]
                 },
                 {
                   id: reqTestId + "-passage-2",
                   test_id: reqTestId,
                   order: 2,
-                  title: "Reading Passage 2",
-                  description: "You should spend about 20 minutes on Questions 14–26.",
+                  title: "Reading Passage 2: Cognitive Neuroplasticity and Adult Second Language Acquisition",
+                  description: "You should spend about 20 minutes on Questions 14–26, which are based on Reading Passage 2 below.",
                   segments: [
-                    { id: reqTestId + "-s2-a", label: "A", content: "Cognitive science has made remarkable strides in understanding human memory consolidation and the role of neuroplasticity." },
-                    { id: reqTestId + "-s2-b", label: "B", content: "Experiments demonstrate that deliberate spaced repetition significantly enhances long-term retention compared to massed practice." },
-                    { id: reqTestId + "-s2-c", label: "C", content: "These insights are now being integrated into digital learning platforms to deliver personalized educational interventions." }
+                    { id: reqTestId + "-s2-a", label: "A", content: "For decades, mainstream developmental psycholinguistics adhered to the strict Critical Period Hypothesis, originally formulated by Eric Lenneberg in 1967. This theory posited that successful language acquisition was biologically constrained to childhood, terminating abruptly around puberty due to the cerebral lateralization of linguistic processing. Adult learners who struggled with foreign syntax, grammar rules, and non-native phonological accents were cited as empirical proof that mature brains lack the neural flexibility necessary to master new linguistic codes." },
+                    { id: reqTestId + "-s2-b", label: "B", content: "Recent neuroimaging breakthroughs utilizing high-resolution functional Magnetic Resonance Imaging (fMRI) and Diffusion Tensor Imaging (DTI) have overturned this deterministic dogma. Neuroscientists now observe robust neuroplastic restructuring in the brains of adult second-language learners. Intense language training leads to measurable volumetric expansion in gray matter density across the left inferior frontal gyrus (Broca’s area) and temporal auditory processing centers, alongside strengthened white matter tract integrity connecting cerebral hemispheres." },
+                    { id: reqTestId + "-s2-c", label: "C", content: "The persistent challenge in adult language learning is not cognitive decline, but rather entrenched neural interference from the learner's native tongue. During infancy, the human auditory cortex undergoes 'neural commitment,' pruning sensitivity to phonemic contrasts absent from parental speech. When an adult encounters unfamiliar non-native phonemes, the auditory cortex automatically maps incoming acoustic signals onto the nearest native phonetic category, causing perceptual misidentification before cognitive processing even begins." },
+                    { id: reqTestId + "-s2-d", label: "D", content: "Working memory capacity and executive inhibitory control play decisive roles in how rapidly adult learners overcome this native-language interference. Bilingual individuals must continuously suppress activation of their first language while formulating utterances in their second. This continuous inhibitory effort recruits the dorsolateral prefrontal cortex and anterior cingulate cortex—the brain's command centers for attentional control, cognitive task-switching, and error detection." },
+                    { id: reqTestId + "-s2-e", label: "E", content: "Educational cognitive psychologists have demonstrated that pedagogical methodology profoundly dictates whether structural neural remodeling occurs. Passive rote memorization produces fragile, temporary episodic memory traces that degrade rapidly. In contrast, spaced deliberate retrieval practice, contextualized communicative problem-solving, and multi-sensory immersion stimulate the release of acetylcholine and brain-derived neurotrophic factor (BDNF), cementing synaptic connections into persistent semantic networks." },
+                    { id: reqTestId + "-s2-f", label: "F", content: "Beyond linguistic proficiency, acquiring a second language in adulthood delivers remarkable collateral cognitive dividends. Epidemiological cohorts tracked over several decades reveal that bilingual adults demonstrate higher cognitive reserve, exhibiting symptom onset of neurodegenerative conditions such as Alzheimer’s disease an average of four to five years later than monolingual peers, despite equivalent underlying neuropathology." },
+                    { id: reqTestId + "-s2-g", label: "G", content: "In conclusion, adult language acquisition should not be viewed through a deficit framework, but as an exemplar of the lifelong adaptability of the human central nervous system. Modern educational technology, incorporating adaptive spaced repetition algorithms and immersive conversational simulations, provides unprecedented avenues to harness this innate neuroplastic potential across all stages of adult life." }
                   ]
                 },
                 {
                   id: reqTestId + "-passage-3",
                   test_id: reqTestId,
                   order: 3,
-                  title: "Reading Passage 3",
-                  description: "You should spend about 20 minutes on Questions 27–40.",
+                  title: "Reading Passage 3: Next-Generation Renewable Energy and Grid-Scale Storage",
+                  description: "You should spend about 20 minutes on Questions 27–40, which are based on Reading Passage 3 below.",
                   segments: [
-                    { id: reqTestId + "-s3-a", label: "A", content: "Renewable energy technologies have experienced exponential growth, driven by advances in photovoltaic efficiency and grid storage." },
-                    { id: reqTestId + "-s3-b", label: "B", content: "Economic models indicate that transitioning to low-carbon infrastructure yields substantial net positive returns across multiple sectors." },
-                    { id: reqTestId + "-s3-c", label: "C", content: "Global cooperation and policy harmonisation remain indispensable prerequisites for achieving international climate benchmarks." }
+                    { id: reqTestId + "-s3-a", label: "A", content: "The worldwide decarbonisation of electric power grids represents one of the most formidable industrial engineering transitions in modern civilization. As conventional fossil fuel power generation is phased out, electrical grids are increasingly supplied by intermittent renewable sources, predominantly solar photovoltaics and wind turbines. However, the fundamental operational challenge of renewables lies in the mismatch between natural generation profiles and consumer demand curves, creating severe grid stability vulnerabilities." },
+                    { id: reqTestId + "-s3-b", label: "B", content: "To overcome generation intermittency, material scientists have achieved transformative advances in photovoltaic cell efficiency. Traditional single-junction silicon cells operate close to their theoretical thermodynamic efficiency limit of roughly twenty-nine percent. Emerging perovskite-silicon tandem cells stack micro-thin layers of metal halide perovskites atop standard silicon wafers, capturing distinct portions of the solar spectrum and raising laboratory conversion efficiencies well above thirty-three percent under real-world irradiance." },
+                    { id: reqTestId + "-s3-c", label: "C", content: "Simultaneously, wind turbine aerodynamics have scaled dramatically. Offshore turbine models now deploy rotor diameters exceeding two hundred and fifty meters, sweeping an area equivalent to multiple football fields. Utilizing flexible composite carbon-fiber materials, modern blades dynamically adjust their pitch in response to micro-gusts, generating steady electricity even in low-wind conditions while withstanding hurricane-force oceanic storms through automated feathering protocols." },
+                    { id: reqTestId + "-s3-d", label: "D", content: "Nevertheless, generation breakthroughs remain incomplete without utility-scale energy storage systems capable of balancing multi-day deficits. While lithium iron phosphate (LFP) batteries dominate short-duration storage of two to four hours, alternative chemistries are emerging for long-duration resilience. Sodium-ion batteries utilize abundant, low-cost sodium salts instead of scarce lithium, while vanadium redox flow batteries store energy in massive liquid electrolyte tanks, allowing energy capacity to scale independently of power rating." },
+                    { id: reqTestId + "-s3-e", label: "E", content: "Grid frequency stabilization presents an equally crucial mechanical challenge. Traditional heavy steam and combustion turbines provided physical rotational inertia, naturally resisting sudden drops in alternating current (AC) grid frequency. As mechanical generators are replaced by solid-state solar inverters, grid operators must deploy grid-forming inverters and mechanical synchronous condensers to provide 'synthetic inertia,' preventing cascading blackout trips during transmission faults." },
+                    { id: reqTestId + "-s3-f", label: "F", content: "The deployment of decentralized smart grids and bidirectional electric vehicle (EV) charging protocols offers additional distributed flexibility. Through vehicle-to-grid (V2G) technology, millions of plugged-in electric passenger vehicles act collectively as a massive virtual power plant, discharging stored kilowatt-hours back into regional distribution networks during peak evening consumption spikes." },
+                    { id: reqTestId + "-s3-g", label: "G", content: "Ultimately, the clean energy transformation is shifting from a technological frontier into an economic and geopolitical realignment. Capital costs for renewable generation and battery storage have plummeted by over eighty-five percent within a single generation. Nations that swiftly establish resilient renewable infrastructure and sovereign battery recycling ecosystems will enjoy substantial economic productivity gains and insulation from volatile global fossil fuel price shocks." }
                   ]
                 }
               ];
@@ -2204,10 +2652,9 @@
             }
           }
 
-          
           // 12b. Reading Question Groups (Standard 3 Parts for IELTS)
           if (tableName === 'reading_question_groups' && method === 'GET') {
-            var rqgMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var rqgMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqRqgId = rqgMatch ? rqgMatch[1] : "";
             var localGroups = getLocalTable('reading_question_groups').filter(function(g) {
               return !reqRqgId || g.test_id === reqRqgId;
@@ -2273,7 +2720,7 @@
 
           // 12c. Reading Questions for Student Exam Experience
           if (tableName === 'reading_questions_student' && method === 'GET') {
-            var rqsMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var rqsMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqRqsId = rqsMatch ? rqsMatch[1] : "";
             
             var localQs = getLocalTable('reading_questions').filter(function(q) {
@@ -2302,7 +2749,7 @@
 
           // 16b. Listening Questions for Student Exam Experience
           if (tableName === 'listening_questions_student' && method === 'GET') {
-            var lqsMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var lqsMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqLqsId = lqsMatch ? lqsMatch[1] : "";
 
             var localLqs = getLocalTable('listening_questions').filter(function(q) {
@@ -2337,7 +2784,7 @@
 
           // 14. Reading Configs
           if (tableName === 'reading_configs' && method === 'GET') {
-            var rcTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var rcTestMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqRcId = rcTestMatch ? rcTestMatch[1] : "";
             var localConfigs = getLocalTable('reading_configs').filter(function(c) {
               return !reqRcId || c.test_id === reqRcId;
@@ -2356,7 +2803,7 @@
 
           // 15. Reading & Listening & Writing Band Scores
           if ((tableName === 'reading_band_scores' || tableName === 'listening_band_scores' || tableName === 'writing_band_scores') && method === 'GET') {
-            var bsTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var bsTestMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqBsId = bsTestMatch ? bsTestMatch[1] : "";
             var localBands = getLocalTable(tableName).filter(function(b) {
               return !reqBsId || b.test_id === reqBsId;
@@ -2372,7 +2819,7 @@
 
           // 16. Listening Parts
           if (tableName === 'listening_parts' && method === 'GET') {
-            var lpTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var lpTestMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqLpId = lpTestMatch ? lpTestMatch[1] : "";
             var localLp = getLocalTable('listening_parts').filter(function(p) {
               return !reqLpId || p.test_id === reqLpId;
@@ -2382,17 +2829,53 @@
             }
             if (reqLpId) {
               return Promise.resolve(makeJsonResponse([
-                { id: reqLpId + "-part-1", test_id: reqLpId, part_number: 1, title: "Part 1: Questions 1-10", prompt: "Social Needs - Everyday Conversation", section_title: "Part 1", audio_url: null, audio_script: "" },
-                { id: reqLpId + "-part-2", test_id: reqLpId, part_number: 2, title: "Part 2: Questions 11-20", prompt: "Social Needs - Monologue in Everyday Context", section_title: "Part 2", audio_url: null, audio_script: "" },
-                { id: reqLpId + "-part-3", test_id: reqLpId, part_number: 3, title: "Part 3: Questions 21-30", prompt: "Educational / Training Discussion", section_title: "Part 3", audio_url: null, audio_script: "" },
-                { id: reqLpId + "-part-4", test_id: reqLpId, part_number: 4, title: "Part 4: Questions 31-40", prompt: "Academic Subject Lecture", section_title: "Part 4", audio_url: null, audio_script: "" }
+                {
+                  id: reqLpId + "-part-1",
+                  test_id: reqLpId,
+                  part_number: 1,
+                  title: "Part 1: Customer Consultation Form",
+                  prompt: "Social Needs - Moving Service Reservation",
+                  section_title: "Part 1: Moving Service Consultation",
+                  audio_url: null,
+                  audio_script: "Representative: Good morning! Apex Relocation and Storage Solutions. How may I assist you today?\nCustomer: Hello, I need to arrange a domestic move for my apartment next month and wanted to get a detailed quotation.\nRepresentative: Certainly! May I have your full name please?\nCustomer: Yes, it's Michael Anderson. That's A-N-D-E-R-S-O-N.\nRepresentative: Thank you, Mr. Anderson. And what is the best telephone number to contact you?\nCustomer: My mobile number is 07700 900452.\nRepresentative: Perfect. And what date are you looking to move?\nCustomer: We have our handover on the 24th of October, so early morning that day would be ideal.\nRepresentative: Great. What is your destination address?\nCustomer: It's number 14 Green Meadow Road, Westbury.\nRepresentative: 14 Green Meadow Road, got it. How many standard storage boxes do you anticipate needing?\nCustomer: Our inventory estimate showed around 15 standard boxes.\nRepresentative: And do you have any delicate or antique items that require reinforced crating?\nCustomer: Yes, we have an antique mirror that belonged to my grandmother. It has an ornate gilt frame.\nRepresentative: We will assign custom timber crating for the mirror. Our moving crew can arrive in the early morning at 8:00 AM. In terms of transit insurance, which tier would you prefer?\nCustomer: I'd definitely prefer the Premium cover for complete peace of mind.\nRepresentative: Excellent. And how would you like to handle the deposit?\nCustomer: I'll pay by credit card now.\nRepresentative: Wonderful. Do you have any promotional referral code today?\nCustomer: Yes, my colleague gave me the discount code MOVE2026.\nRepresentative: That applies a ten percent discount immediately. Let me confirm all those details for you..."
+                },
+                {
+                  id: reqLpId + "-part-2",
+                  test_id: reqLpId,
+                  part_number: 2,
+                  title: "Part 2: Community Heritage Tour",
+                  prompt: "Social Needs - Monologue on Municipal Facilities",
+                  section_title: "Part 2: Historic Town Hall Initiative",
+                  audio_url: null,
+                  audio_script: "Speaker: Good evening everyone, and welcome to our community briefing on the Westbury Heritage Revitalization Project. Tonight, I am delighted to share our progress on restoring the municipal historic quarter.\n\nFirst, concerning the public facilities: Many of you have asked about access to our historic archives. I am pleased to announce that beginning next month, the town hall archives will be fully accessible to members of the public free of charge, with guided architectural walks taking place every Tuesday and Saturday morning.\n\nRegarding the development plans for the civic square: Following our extensive public consultation last autumn, the committee voted to proceed with the proposal to renovate the central auditorium rather than building a commercial annex. The auditorium acoustics will be upgraded to world-class standards while retaining the original Victorian plasterwork.\n\nFunding for this landmark restoration has been secured through a unique multi-stakeholder partnership. While municipal council reserves provided initial feasibility funds, the substantial capital grant of three million pounds was awarded by the national heritage lottery, supplemented by generous sponsorships from local corporate foundations...\n\nPlease take a copy of the site map from the foyer as we explore the four main wings of the restored building..."
+                },
+                {
+                  id: reqLpId + "-part-3",
+                  test_id: reqLpId,
+                  part_number: 3,
+                  title: "Part 3: Academic Project Review",
+                  prompt: "Educational Discussion between Two Students",
+                  section_title: "Part 3: Sociology Research Methodology",
+                  audio_url: null,
+                  audio_script: "Jack: Hi Chloe, thanks for meeting up. We really need to finalize our presentation for Dr. Harrison's sociology seminar on Thursday.\nChloe: Absolutely, Jack. I've been reviewing the reviewer comments on our preliminary pilot study. What did you think about their assessment of our methodology?\nJack: Well, the feedback pointed out that our literature review was insufficiently focused on urban communities. We spent too much space reviewing rural studies which didn't match our research questions.\nChloe: I completely agree. We should trim those sections and focus squarely on metropolitan social networks. But what about our primary data collection? The reviewers felt our sample size of twenty participants was too limited to draw statistically valid conclusions.\nJack: That's true, but remember our primary paradigm was qualitative rather than quantitative. We conducted in-depth two-hour focus groups rather than quick online surveys. Still, we should acknowledge that limitation in our methodology slide.\nChloe: Good idea. And for the qualitative coding, how should we present the focus group transcript analysis?\nJack: I suggest we create a thematic matrix comparing the four recurring themes across both age cohorts. It makes the inductive coding clear and visual.\nChloe: Perfect. Let's draft the presentation slides right now..."
+                },
+                {
+                  id: reqLpId + "-part-4",
+                  test_id: reqLpId,
+                  part_number: 4,
+                  title: "Part 4: Oceanography Lecture",
+                  prompt: "Academic Subject Lecture on Marine Ecology",
+                  section_title: "Part 4: Ocean Ecosystems and Conservation",
+                  audio_url: null,
+                  audio_script: "Professor Davis: Good morning, class. In today's lecture on marine biological systems, we will examine the physiological adaptations of oceanic fauna and the systemic anthropogenic pressures confronting marine biomes.\n\nTo begin with, marine biological rhythms across coastal and pelagic species are fundamentally governed by the gravitational pull of the moon. This tidal synchrony dictates reproductive spawning cycles, migratory feeding ascents, and intertidal foraging behaviors across hundreds of marine phyla.\n\nMoving deeper into the bathypelagic and abyssopelagic zones, organisms must withstand immense hydrostatic pressure, which increases by one atmosphere every ten meters of depth. Deep-sea organisms adapt to extreme water pressure through modified membrane phospholipids and specialized piezolyte enzymes that prevent cellular collapse.\n\nBioluminescent reactions are exceptionally prevalent at these depths. While early marine biologists hypothesized that light production was primarily defensive, modern submersibles have shown that bioluminescence serves primarily for mate attraction and prey detection in the total absence of sunlight.\n\nTurning now to global environmental pressures: Tropical coral reefs are experiencing mass mortality through coral bleaching, a phenomenon triggered when sea temperatures exceed seasonal thresholds by as little as one to two degrees Celsius for sustained periods.\n\nFurthermore, plastic pollution has reached critical concentrations. Microplastic particles accumulate most densely in oceanic convergence zones—the massive subtropical gyres where ocean currents concentrate floating debris into expansive accumulation zones.\n\nNutrient upwelling currents sustain vast populations of photosynthetic plankton, forming the trophic foundation for global fisheries. However, marine protected areas remain vital: International marine reserves enforce total prohibition of commercial fishing to allow fish stocks and benthic ecosystems to regenerate.\n\nUltimately, the efficacy of future marine conservation will depend upon binding cross-border diplomatic cooperation across all maritime nations..."
+                }
               ]));
             }
           }
 
           // 17. Writing Passages, Configs, Questions, and Segments
           if (tableName === 'writing_passages' && method === 'GET') {
-            var wpTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var wpTestMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqWpId = wpTestMatch ? wpTestMatch[1] : "";
             var localWp = getLocalTable('writing_passages').filter(function(p) {
               return !reqWpId || p.test_id === reqWpId;
@@ -2407,7 +2890,7 @@
           }
 
           if (tableName === 'writing_configs' && method === 'GET') {
-            var wcTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var wcTestMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqWcId = wcTestMatch ? wcTestMatch[1] : "";
             var localWc = getLocalTable('writing_configs').filter(function(c) {
               return !reqWcId || c.test_id === reqWcId;
@@ -2422,7 +2905,7 @@
           }
 
           if ((tableName === 'writing_questions' || tableName === 'writing_questions_student') && method === 'GET') {
-            var wqTestMatch = search.match(/test_id=eq\.([a-f0-9\-]+)/i);
+            var wqTestMatch = search.match(/test_id=eq\.([a-zA-Z0-9_\-]+)/i);
             var reqWqId = wqTestMatch ? wqTestMatch[1] : "";
             var localWq = getLocalTable('writing_questions').filter(function(q) {
               return !reqWqId || q.test_id === reqWqId;
@@ -2454,7 +2937,7 @@
                                tableName === 'writing_tests' || tableName === 'speaking_tests' || 
                                tableName === 'full_mock_tests');
           if (isModuleTable && method === 'GET') {
-            var idEqMatch = search.match(/id=eq\.([a-f0-9\-]+)/i);
+            var idEqMatch = search.match(/id=eq\.([a-zA-Z0-9_\-]+)/i);
             if (idEqMatch) {
               var targetLookupId = idEqMatch[1];
               // 1. Check local storage
