@@ -777,6 +777,7 @@
         test_type: "academic",
         series: "testloom",
         cambridge_book: 1,
+        cambridge_book: 1,
         test_number: 1,
         admin_only: false,
         instructions: []
@@ -791,6 +792,7 @@
         test_type: "academic",
         series: "testloom",
         cambridge_book: 1,
+        cambridge_book: 1,
         test_number: 2,
         admin_only: false,
         instructions: []
@@ -804,6 +806,7 @@
         difficulty: "medium",
         test_type: "general_training",
         series: "testloom",
+        book_number: 1,
         cambridge_book: 1,
         test_number: 1,
         admin_only: false,
@@ -822,6 +825,7 @@
         test_number: 1,
         test_type: "academic",
         series: "testloom",
+        cambridge_book: 1,
         admin_only: false,
         instructions: []
       },
@@ -835,6 +839,7 @@
         test_number: 2,
         test_type: "academic",
         series: "testloom",
+        cambridge_book: 1,
         admin_only: false,
         instructions: []
       }
@@ -851,6 +856,7 @@
         test_type: "academic",
         series: "testloom",
         cambridge_book: 1,
+        cambridge_book: 1,
         test_number: 1,
         admin_only: false,
         instructions: []
@@ -864,6 +870,7 @@
         difficulty: "medium",
         test_type: "general_training",
         series: "testloom",
+        book_number: 1,
         cambridge_book: 1,
         test_number: 1,
         admin_only: false,
@@ -2147,8 +2154,21 @@
             }));
           }
 
+          if (rpcName === 'ensure_attempt_timer' || rpcName === 'extend_attempt_timer') {
+            var now = new Date();
+            var dur = Number((rpcBody && (rpcBody._duration_seconds || rpcBody._min_seconds_left || rpcBody.duration_seconds)) || 3600);
+            var deadline = new Date(now.getTime() + dur * 1000);
+            return Promise.resolve(makeJsonResponse([{
+              deadline_at: deadline.toISOString(),
+              server_now: now.toISOString(),
+              duration_seconds: dur,
+              seconds_left: dur,
+              expired: false
+            }]));
+          }
+
           if (rpcName === 'mark_test_attempt_completed' || rpcName === 'pause_attempt_timer' ||
-              rpcName === 'extend_attempt_timer' || rpcName === 'recalc_listening_attempt') {
+              rpcName === 'recalc_listening_attempt') {
             return Promise.resolve(makeJsonResponse({ success: true, band: 7.5 }));
           }
 
