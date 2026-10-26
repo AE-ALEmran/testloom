@@ -1756,7 +1756,23 @@
       }
 
       // Check if targeting Supabase
-      if (url && url.indexOf('jwwklcjvwgypqfznzsaw.supabase.co') !== -1) {
+      // Check if targeting Supabase (remote domain, local origin, or relative /rest/v1 or /auth/v1)
+      var isSupabase = url && (
+        url.indexOf('jwwklcjvwgypqfznzsaw.supabase.co') !== -1 ||
+        url.indexOf('/rest/v1/') !== -1 ||
+        url.indexOf('/auth/v1/') !== -1 ||
+        url.indexOf('/storage/v1/') !== -1
+      );
+      if (isSupabase) {
+        var parsedUrl = new URL(url, window.location.origin);
+        var pathname = parsedUrl.pathname;
+        if (pathname.indexOf('/rest/v1/') !== -1) {
+          pathname = pathname.slice(pathname.indexOf('/rest/v1/'));
+        } else if (pathname.indexOf('/auth/v1/') !== -1) {
+          pathname = pathname.slice(pathname.indexOf('/auth/v1/'));
+        } else if (pathname.indexOf('/storage/v1/') !== -1) {
+          pathname = pathname.slice(pathname.indexOf('/storage/v1/'));
+        }
         var parsedUrl = new URL(url);
         var pathname = parsedUrl.pathname;
         var search = parsedUrl.search;
@@ -1994,26 +2010,142 @@
             });
           }
 
-          // 6. Test submission & scoring RPCs
-          if (rpcName === 'submit_reading_attempt' || rpcName === 'submit_listening_attempt' || 
-              rpcName === 'submit_writing_attempt' || rpcName === 'grade_test_answers' || 
-              rpcName === 'resolve_test_band' || rpcName === 'finalize_attempt' ||
-              rpcName === 'submit_full_mock_attempt' || rpcName === 'complete_attempt') {
-            var band = (Math.round((6.0 + Math.random() * 2.5) * 2) / 2).toFixed(1);
+          // 6. Test Session Initialization RPC (ensureAttempt)
+          if (rpcName === 'start_test_attempt' || rpcName === 'create_attempt' || rpcName === 'start_reading_attempt' ||
+              rpcName === 'start_listening_attempt' || rpcName === 'start_writing_attempt' || rpcName === 'start_full_mock_attempt') {
+            var hexChars = '0123456789abcdef';
+            var randHex = function(len) {
+              var s = '';
+              for (var k = 0; k < len; k++) s += hexChars.charAt(Math.floor(Math.random() * 16));
+              return s;
+            };
+            var attemptUuid = randHex(8) + '-' + randHex(4) + '-4' + randHex(3) + '-8' + randHex(3) + '-' + randHex(12);
+            var isAd = localStorage.getItem('mock_admin') === 'true';
+            var activeUid = isAd ? 'admin-emran-id' : 'student-user-1';
+            var newAttempt = {
+              id: attemptUuid,
+              user_id: activeUid,
+              test_id: targetTestId,
+              test_type: rpcBody._test_type || rpcBody.test_type || 'reading',
+              status: 'in_progress',
+              raw_score: null,
+              overall_band: null,
+              reading_band: null,
+              listening_band: null,
+              writing_band: null,
+              speaking_band: null,
+              started_at: new Date().toISOString(),
+              completed_at: null,
+              time_taken: 0,
+              total_questions: 40,
+              correct_answers: null
+            };
+            try {
+              var currAttempts = getLocalTable('test_attempts');
+              currAttempts.unshift(newAttempt);
+              setLocalTable('test_attempts', currAttempts);
+            } catch(e) {}
+            return Promise.resolve(makeJsonResponse(attemptUuid));
+          }
+
+          // 6a. Band resolution RPC (returns numeric band scalar)
+          if (rpcName === 'resolve_test_band') {
+            var rawCorrect = Number(rpcBody._correct || rpcBody.correct || 30);
+            var bandVal = 7.0;
+            if (rawCorrect >= 39) bandVal = 9.0;
+            else if (rawCorrect >= 37) bandVal = 8.5;
+            else if (rawCorrect >= 35) bandVal = 8.0;
+            else if (rawCorrect >= 32) bandVal = 7.5;
+            else if (rawCorrect >= 30) bandVal = 7.0;
+            else if (rawCorrect >= 26) bandVal = 6.5;
+            else if (rawCorrect >= 23) bandVal = 6.0;
+            else if (rawCorrect >= 18) bandVal = 5.5;
+            else if (rawCorrect >= 16) bandVal = 5.0;
+            else if (rawCorrect >= 13) bandVal = 4.5;
+            else if (rawCorrect >= 10) bandVal = 4.0;
+            else bandVal = 3.5;
+            return Promise.resolve(makeJsonResponse(bandVal));
+          }
+
+          // 6b. Grading & Submissions
+          if (rpcName === 'grade_test_answers') {
+            var ansCount = Object.keys(rpcBody._answers || {}).length;
+            var correctCount = Math.min(40, Math.max(28, ansCount > 0 ? ansCount : 32));
+            return Promise.resolve(makeJsonResponse({
+              correct: correctCount,
+              band: 7.5,
+              total: 40
+            }));
+          }
+
+          if (rpcName === 'submit_reading_attempt' || rpcName === 'submit_listening_attempt' ||
+              rpcName === 'submit_writing_attempt' || rpcName === 'submit_full_mock_attempt' ||
+              rpcName === 'finalize_attempt' || rpcName === 'complete_attempt') {
+            var subAttemptId = rpcBody._attempt_id || rpcBody.attempt_id || ('att-' + Date.now());
+            var userAnswers = rpcBody._answers || rpcBody.answers || {};
+            var ansCount = Object.keys(userAnswers).length;
+            var correctScore = Math.min(40, Math.max(30, ansCount > 0 ? ansCount : 34));
+            var calculatedBand = correctScore >= 35 ? 8.0 : (correctScore >= 32 ? 7.5 : 7.0);
+
+            try {
+              var allTa = getLocalTable('test_attempts');
+              var matchedTa = allTa.find(function(a) { return a.id === subAttemptId; });
+              if (matchedTa) {
+                matchedTa.status = 'completed';
+                matchedTa.completed_at = new Date().toISOString();
+                matchedTa.raw_score = correctScore;
+                matchedTa.correct_answers = correctScore;
+                matchedTa.overall_band = calculatedBand;
+                if (rpcName.indexOf('reading') !== -1) matchedTa.reading_band = calculatedBand;
+                if (rpcName.indexOf('listening') !== -1) matchedTa.listening_band = calculatedBand;
+                if (rpcName.indexOf('writing') !== -1) matchedTa.writing_band = calculatedBand;
+                setLocalTable('test_attempts', allTa);
+              }
+            } catch(e) {}
+
             return Promise.resolve(makeJsonResponse({
               success: true,
-              attempt_id: rpcBody.attempt_id || ('att-' + Date.now()),
-              band: parseFloat(band),
-              overall_band: parseFloat(band),
-              reading_band: rpcName.indexOf('reading') !== -1 ? parseFloat(band) : null,
-              listening_band: rpcName.indexOf('listening') !== -1 ? parseFloat(band) : null,
-              writing_band: rpcName.indexOf('writing') !== -1 ? parseFloat(band) : null,
-              raw_score: 30 + Math.floor(Math.random() * 8),
-              total_questions: 40,
-              correct_answers: 30 + Math.floor(Math.random() * 8),
-              graded_at: new Date().toISOString(),
+              correct: correctScore,
+              band: calculatedBand,
+              overall_band: calculatedBand,
+              attempt_id: subAttemptId,
+              score: correctScore,
               status: 'completed'
             }));
+          }
+
+          // 6c. Answers Review & Audio RPCs
+          if (rpcName === 'get_answers_for_review') {
+            var reviewList = [];
+            for (var qNum = 1; qNum <= 40; qNum++) {
+              reviewList.push({
+                question_number: qNum,
+                correct_answer: (qNum % 3 === 0) ? "NOT GIVEN" : (qNum % 2 === 0 ? "FALSE" : "TRUE")
+              });
+            }
+            return Promise.resolve(makeJsonResponse(reviewList));
+          }
+
+          if (rpcName === 'get_listening_test_audio') {
+            var sampleAudio = "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg";
+            return Promise.resolve(makeJsonResponse({
+              audio_url: sampleAudio,
+              parts: [
+                { part_number: 1, title: "Part 1 - Social & Daily Conversation", audio_url: sampleAudio },
+                { part_number: 2, title: "Part 2 - Local Community & Facilities", audio_url: sampleAudio },
+                { part_number: 3, title: "Part 3 - Educational & Training Discussion", audio_url: sampleAudio },
+                { part_number: 4, title: "Part 4 - Academic Lecture & Analysis", audio_url: sampleAudio }
+              ]
+            }));
+          }
+
+          if (rpcName === 'mark_test_attempt_completed' || rpcName === 'pause_attempt_timer' ||
+              rpcName === 'extend_attempt_timer' || rpcName === 'recalc_listening_attempt') {
+            return Promise.resolve(makeJsonResponse({ success: true, band: 7.5 }));
+          }
+
+          if (rpcName === 'get_resumable_attempts') {
+            return Promise.resolve(makeJsonResponse([]));
           }
 
           // 6b. Student dashboard stats RPC
@@ -2049,6 +2181,12 @@
           // 7. General verification & admin status RPCs
           if (rpcName === 'is_admin_verified' || rpcName === 'has_role') {
             return Promise.resolve(makeJsonResponse(true));
+          }
+          if (rpcName === 'ensure_ai_speaking_usage_day') {
+            return Promise.resolve(makeJsonResponse({ allowed: true, remaining: 10 }));
+          }
+          if (rpcName === 'get_gateway_public_config') {
+            return Promise.resolve(makeJsonResponse({ active_gateways: ['zinipay', 'bkash', 'nagad', 'stripe', 'paypal'], currencies: ['BDT', 'USD'] }));
           }
           if (rpcName === 'pre_login_check') {
             return Promise.resolve(makeJsonResponse({ allowed: true, ip: "127.0.0.1", country: "BD" }));
@@ -2588,9 +2726,32 @@
             return Promise.resolve(makeJsonResponse([mockBranding]));
           }
 
-          // 5. user_subscriptions
+          // 5. user_subscriptions (Active VIP Exam Pass for student and admin)
           if (tableName === 'user_subscriptions' && method === 'GET') {
-            return Promise.resolve(makeJsonResponse(mockSubscriptions));
+            var subUidMatch = search.match(/user_id=eq\.([a-zA-Z0-9_\-]+)/i);
+            var reqUid = subUidMatch ? subUidMatch[1] : (localStorage.getItem('mock_admin') === 'true' ? 'admin-emran-id' : 'student-user-1');
+            var userSub = {
+              id: "sub-active-" + reqUid,
+              user_id: reqUid,
+              status: "active",
+              reading_tests_used: 0,
+              listening_tests_used: 0,
+              writing_tests_used: 0,
+              mock_tests_used: 0,
+              speaking_sessions_used: 0,
+              starts_at: "2026-01-01T00:00:00Z",
+              expires_at: "2030-01-01T00:00:00Z",
+              packages: {
+                id: "pkg-master",
+                name: "VIP All-Access Exam Pass",
+                max_reading_tests: -1,
+                max_listening_tests: -1,
+                max_writing_tests: -1,
+                max_mock_tests: -1,
+                max_speaking_sessions: -1
+              }
+            };
+            return Promise.resolve(makeJsonResponse([userSub]));
           }
 
           // 6. free_trial_tests
@@ -2728,7 +2889,7 @@
                tableName === 'speaking_test_questions' || tableName === 'speaking_tts_assets' ||
                tableName === 'staff_roles' || tableName === 'stories' ||
                tableName === 'student_assignments' || tableName === 'student_auto_notifications' ||
-               tableName === 'student_section_config' || tableName === 'study_plan_templates' ||
+               tableName === 'study_plan_templates' ||
                tableName === 'submission_status_thresholds' || tableName === 'testimonials' ||
                tableName === 'tracked_links' || tableName === 'user_devices' ||
                tableName === 'user_roles' || tableName === 'vapid_keys' ||
@@ -2737,6 +2898,21 @@
                tableName === 'writing_grading_events' || tableName === 'zinipay_payment_events'
              ) && method === 'GET') {
             return Promise.resolve(makeJsonResponse([]));
+          }
+
+          // 11. student_section_config (Sidebar & Practice Modules access)
+          if (tableName === 'student_section_config' && method === 'GET') {
+            var activeSections = [
+              { section_id: 'sidebar.mock_tests', status: 'active' },
+              { section_id: 'sidebar.reading', status: 'active' },
+              { section_id: 'sidebar.listening', status: 'active' },
+              { section_id: 'sidebar.writing', status: 'active' },
+              { section_id: 'sidebar.speaking', status: 'active' },
+              { section_id: 'sidebar.reports', status: 'active' },
+              { section_id: 'sidebar.leaderboard', status: 'active' },
+              { section_id: 'sidebar.subscriptions', status: 'active' }
+            ];
+            return Promise.resolve(makeJsonResponse(activeSections));
           }
 
           // 11b. study_plans (Results page - student study plan)
@@ -3326,6 +3502,26 @@
 
     return originalFetch.call(this, input, init);
   };
+
+  // Pre-seed official student navigation & section access cache
+  try {
+    var cachedSec = localStorage.getItem('pp:public-data:v1:section-config');
+    if (!cachedSec) {
+      localStorage.setItem('pp:public-data:v1:section-config', JSON.stringify({
+        savedAt: Date.now(),
+        value: [
+          { section_id: 'sidebar.mock_tests', status: 'active' },
+          { section_id: 'sidebar.reading', status: 'active' },
+          { section_id: 'sidebar.listening', status: 'active' },
+          { section_id: 'sidebar.writing', status: 'active' },
+          { section_id: 'sidebar.speaking', status: 'active' },
+          { section_id: 'sidebar.reports', status: 'active' },
+          { section_id: 'sidebar.leaderboard', status: 'active' },
+          { section_id: 'sidebar.subscriptions', status: 'active' }
+        ]
+      }));
+    }
+  } catch(e) {}
 
   // 15. Pre-warm test module caches in background for instant loading
   setTimeout(function() {
