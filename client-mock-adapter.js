@@ -2097,7 +2097,7 @@
               rpcName === 'submit_writing_attempt' || rpcName === 'submit_full_mock_attempt' ||
               rpcName === 'finalize_attempt' || rpcName === 'complete_attempt') {
             var subAttemptId = rpcBody._attempt_id || rpcBody.attempt_id || ('att-' + Date.now());
-            var userAnswers = rpcBody._answers || rpcBody.answers || {};
+            var userAnswers = rpcBody._answers || rpcBody.answers || rpcBody._submissions || {};
             var ansCount = Object.keys(userAnswers).length;
             var correctScore = Math.min(40, Math.max(30, ansCount > 0 ? ansCount : 34));
             var calculatedBand = correctScore >= 35 ? 8.0 : (correctScore >= 32 ? 7.5 : 7.0);
@@ -2362,6 +2362,22 @@
         // -------------------------------------------------------------
         if (pathname.indexOf('/functions/v1/') === 0) {
           var funcName = pathname.slice('/functions/v1/'.length).split('/')[0].split('?')[0];
+
+          if (funcName === 'grade-writing') {
+            return Promise.resolve(makeJsonResponse({
+              writing_band: 7.5,
+              task1_band: 7.5,
+              task2_band: 7.5,
+              feedback: "Demonstrates clear paragraph structure, strong lexical variation, and accurate grammatical constructions with minor natural slips."
+            }));
+          }
+
+          if (funcName === 'grade-speaking') {
+            return Promise.resolve(makeJsonResponse({
+              speaking_band: 7.5,
+              feedback: "Fluent discourse with wide lexical resource, consistent pronunciation, and natural intonation patterns."
+            }));
+          }
 
           if (funcName === 'cool-sms') {
             return Promise.resolve(makeJsonResponse({
