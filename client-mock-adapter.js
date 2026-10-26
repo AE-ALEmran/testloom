@@ -775,7 +775,9 @@
         is_active: true,
         difficulty: "medium",
         test_type: "academic",
-        series: "puropuro",
+        series: "testloom",
+        cambridge_book: 1,
+        test_number: 1,
         admin_only: false,
         instructions: []
       },
@@ -787,7 +789,9 @@
         is_active: true,
         difficulty: "hard",
         test_type: "academic",
-        series: "puropuro",
+        series: "testloom",
+        cambridge_book: 1,
+        test_number: 2,
         admin_only: false,
         instructions: []
       },
@@ -799,7 +803,9 @@
         is_active: true,
         difficulty: "medium",
         test_type: "general_training",
-        series: "puropuro",
+        series: "testloom",
+        cambridge_book: 1,
+        test_number: 1,
         admin_only: false,
         instructions: []
       }
@@ -815,7 +821,7 @@
         book_number: 1,
         test_number: 1,
         test_type: "academic",
-        series: "puropuro",
+        series: "testloom",
         admin_only: false,
         instructions: []
       },
@@ -828,7 +834,7 @@
         book_number: 1,
         test_number: 2,
         test_type: "academic",
-        series: "puropuro",
+        series: "testloom",
         admin_only: false,
         instructions: []
       }
@@ -843,7 +849,9 @@
         is_active: true,
         difficulty: "medium",
         test_type: "academic",
-        series: "puropuro",
+        series: "testloom",
+        cambridge_book: 1,
+        test_number: 1,
         admin_only: false,
         instructions: []
       },
@@ -855,7 +863,9 @@
         is_active: true,
         difficulty: "medium",
         test_type: "general_training",
-        series: "puropuro",
+        series: "testloom",
+        cambridge_book: 1,
+        test_number: 1,
         admin_only: false,
         instructions: []
       }
