@@ -1796,6 +1796,70 @@
         // -------------------------------------------------------------
         // A. Handle Auth (Direct login & session tokens)
         // -------------------------------------------------------------
+        // 1. Signup endpoint
+        if (pathname.indexOf('/auth/v1/signup') === 0) {
+          var sBody = {};
+          try {
+            if (init && init.body) {
+              sBody = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
+            }
+          } catch(e) {}
+          var sEmail = (sBody.email || "newstudent@testloom.com").trim().toLowerCase();
+          var sMeta = (sBody.options && sBody.options.data) || sBody.data || {};
+          var sFullName = sMeta.full_name || sBody.full_name || "IELTS Candidate";
+          var sPhone = sMeta.phone || sBody.phone || "+880 1700-000000";
+          var newUid = "student-" + Date.now();
+
+          try {
+            localStorage.removeItem('mock_admin');
+            localStorage.setItem('mock_student', 'true');
+            localStorage.setItem('mock_student_email', sEmail);
+            localStorage.setItem('mock_student_name', sFullName);
+            localStorage.setItem('mock_student_phone', sPhone);
+          } catch(e) {}
+
+          var newStudentUser = {
+            id: newUid,
+            aud: "authenticated",
+            role: "authenticated",
+            email: sEmail,
+            email_confirmed_at: new Date().toISOString(),
+            phone: sPhone,
+            user_metadata: {
+              full_name: sFullName,
+              phone: sPhone,
+              role: "student"
+            },
+            app_metadata: {
+              provider: "email",
+              providers: ["email"]
+            }
+          };
+
+          return Promise.resolve(makeJsonResponse({
+            access_token: "mock-access-token-" + Date.now(),
+            token_type: "bearer",
+            expires_in: 86400,
+            refresh_token: "mock-refresh-token",
+            user: newStudentUser
+          }));
+        }
+
+        // 2. Logout endpoint
+        if (pathname.indexOf('/auth/v1/logout') === 0) {
+          try {
+            localStorage.removeItem('mock_admin');
+            localStorage.removeItem('mock_student');
+            localStorage.removeItem('sb-jwwklcjvwgypqfznzsaw-auth-token');
+          } catch(e) {}
+          return Promise.resolve(makeJsonResponse({}, 200));
+        }
+
+        // 3. Password recovery endpoint
+        if (pathname.indexOf('/auth/v1/recover') === 0) {
+          return Promise.resolve(makeJsonResponse({ message: "Password recovery instructions sent." }, 200));
+        }
+
         if (pathname.indexOf('/auth/v1/token') === 0) {
           var body = {};
           try {
@@ -2145,6 +2209,7 @@
             var sampleAudio = "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg";
             return Promise.resolve(makeJsonResponse({
               audio_url: sampleAudio,
+              continuous_audio_url: sampleAudio,
               parts: [
                 { part_number: 1, title: "Part 1 - Social & Daily Conversation", audio_url: sampleAudio },
                 { part_number: 2, title: "Part 2 - Local Community & Facilities", audio_url: sampleAudio },
@@ -2816,16 +2881,37 @@
             return Promise.resolve(makeJsonResponse(mockPaymentSettings));
           }
 
-          // 9. profiles
-          if (tableName === 'profiles' && method === 'GET') {
+          // 9. profiles (GET, PATCH, PUT, POST)
+          if (tableName === 'profiles') {
             var isAdminProfile = localStorage.getItem('mock_admin') === 'true';
             var em = isAdminProfile ? "emranuc52@gmail.com" : (localStorage.getItem('mock_student_email') || "student@testloom.com");
+            var fn = isAdminProfile ? "Emran" : (localStorage.getItem('mock_student_name') || "Student User");
+            var ph = localStorage.getItem('mock_student_phone') || "+880 1700-000000";
+
+            if (method === 'PATCH' || method === 'PUT' || method === 'POST') {
+              var pBody = {};
+              try {
+                if (init && init.body) pBody = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
+              } catch(e) {}
+              if (pBody.full_name) { fn = pBody.full_name; localStorage.setItem('mock_student_name', fn); }
+              if (pBody.phone) { ph = pBody.phone; localStorage.setItem('mock_student_phone', ph); }
+              var updatedProf = {
+                id: isAdminProfile ? "admin-emran-id" : "student-user-1",
+                email: em,
+                full_name: fn,
+                role: isAdminProfile ? "admin" : "student",
+                phone: ph,
+                is_active: true
+              };
+              return Promise.resolve(makeJsonResponse([updatedProf]));
+            }
+
             return Promise.resolve(makeJsonResponse([{
               id: isAdminProfile ? "admin-emran-id" : "student-user-1",
               email: em,
-              full_name: isAdminProfile ? "Emran" : "Student",
+              full_name: fn,
               role: isAdminProfile ? "admin" : "student",
-              phone: "+880 1700-000000",
+              phone: ph,
               is_active: true
             }]));
           }
@@ -2969,7 +3055,8 @@
             var isAdminTa = localStorage.getItem('mock_admin') === 'true';
             var userId = isAdminTa ? 'admin-emran-id' : 'student-user-1';
             // Build realistic mock attempts
-            var mockAttempts = [
+            var localDynamicAttempts = getLocalTable('test_attempts') || [];
+            var mockAttempts = localDynamicAttempts.concat([
               { id: 'att-r-1', user_id: userId, test_id: '0e6e815f-3ffb-485f-bf46-32cd854aabd4', test_type: 'reading', status: 'completed', raw_score: 33, overall_band: 7.5, reading_band: 7.5, listening_band: null, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 2*86400000).toISOString(), completed_at: new Date(Date.now() - 2*86400000 + 3600000).toISOString(), time_taken: 3600, total_questions: 40, correct_answers: 33 },
               { id: 'att-l-1', user_id: userId, test_id: '290296c5-f08d-4947-9568-f8028d7dbc24', test_type: 'listening', status: 'completed', raw_score: 30, overall_band: 7.0, reading_band: null, listening_band: 7.0, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 4*86400000).toISOString(), completed_at: new Date(Date.now() - 4*86400000 + 2400000).toISOString(), time_taken: 2400, total_questions: 40, correct_answers: 30 },
               { id: 'att-w-1', user_id: userId, test_id: 'de97785a-94f5-4e74-9a7d-16ff4490ac75', test_type: 'writing', status: 'completed', raw_score: null, overall_band: 6.5, reading_band: null, listening_band: null, writing_band: 6.5, speaking_band: null, started_at: new Date(Date.now() - 6*86400000).toISOString(), completed_at: new Date(Date.now() - 6*86400000 + 4800000).toISOString(), time_taken: 4800, total_questions: 2, correct_answers: null },
@@ -2977,7 +3064,7 @@
               { id: 'att-r-2', user_id: userId, test_id: '475fe04b-060d-4267-b8ef-e1d37785fb49', test_type: 'reading', status: 'completed', raw_score: 27, overall_band: 6.5, reading_band: 6.5, listening_band: null, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 10*86400000).toISOString(), completed_at: new Date(Date.now() - 10*86400000 + 3600000).toISOString(), time_taken: 3600, total_questions: 40, correct_answers: 27 },
               { id: 'att-l-2', user_id: userId, test_id: '3ea2cd99-05fa-442b-a8b2-800c45cc2cdf', test_type: 'listening', status: 'completed', raw_score: 35, overall_band: 8.0, reading_band: null, listening_band: 8.0, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 12*86400000).toISOString(), completed_at: new Date(Date.now() - 12*86400000 + 2400000).toISOString(), time_taken: 2400, total_questions: 40, correct_answers: 35 },
               { id: 'att-fm-2', user_id: userId, test_id: 'f3b1ae22-c7c6-4da9-9500-506666b6f9d8', test_type: 'full_mock', status: 'in_progress', raw_score: null, overall_band: null, reading_band: null, listening_band: null, writing_band: null, speaking_band: null, started_at: new Date(Date.now() - 30*60000).toISOString(), completed_at: null, time_taken: null, total_questions: 80, correct_answers: null }
-            ];
+            ]);
             // Filter by user_id if query has user_id filter
             var uidMatch2 = search.match(/user_id=eq\.([a-z0-9\-]+)/i);
             var statusMatch = search.match(/status=eq\.([a-z_]+)/i);
@@ -3303,7 +3390,7 @@
                   title: "Part 1: Customer Consultation Form",
                   prompt: "Social Needs - Moving Service Reservation",
                   section_title: "Part 1: Moving Service Consultation",
-                  audio_url: null,
+                  audio_url: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
                   audio_script: "Representative: Good morning! Apex Relocation and Storage Solutions. How may I assist you today?\nCustomer: Hello, I need to arrange a domestic move for my apartment next month and wanted to get a detailed quotation.\nRepresentative: Certainly! May I have your full name please?\nCustomer: Yes, it's Michael Anderson. That's A-N-D-E-R-S-O-N.\nRepresentative: Thank you, Mr. Anderson. And what is the best telephone number to contact you?\nCustomer: My mobile number is 07700 900452.\nRepresentative: Perfect. And what date are you looking to move?\nCustomer: We have our handover on the 24th of October, so early morning that day would be ideal.\nRepresentative: Great. What is your destination address?\nCustomer: It's number 14 Green Meadow Road, Westbury.\nRepresentative: 14 Green Meadow Road, got it. How many standard storage boxes do you anticipate needing?\nCustomer: Our inventory estimate showed around 15 standard boxes.\nRepresentative: And do you have any delicate or antique items that require reinforced crating?\nCustomer: Yes, we have an antique mirror that belonged to my grandmother. It has an ornate gilt frame.\nRepresentative: We will assign custom timber crating for the mirror. Our moving crew can arrive in the early morning at 8:00 AM. In terms of transit insurance, which tier would you prefer?\nCustomer: I'd definitely prefer the Premium cover for complete peace of mind.\nRepresentative: Excellent. And how would you like to handle the deposit?\nCustomer: I'll pay by credit card now.\nRepresentative: Wonderful. Do you have any promotional referral code today?\nCustomer: Yes, my colleague gave me the discount code MOVE2026.\nRepresentative: That applies a ten percent discount immediately. Let me confirm all those details for you..."
                 },
                 {
@@ -3313,7 +3400,7 @@
                   title: "Part 2: Community Heritage Tour",
                   prompt: "Social Needs - Monologue on Municipal Facilities",
                   section_title: "Part 2: Historic Town Hall Initiative",
-                  audio_url: null,
+                  audio_url: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
                   audio_script: "Speaker: Good evening everyone, and welcome to our community briefing on the Westbury Heritage Revitalization Project. Tonight, I am delighted to share our progress on restoring the municipal historic quarter.\n\nFirst, concerning the public facilities: Many of you have asked about access to our historic archives. I am pleased to announce that beginning next month, the town hall archives will be fully accessible to members of the public free of charge, with guided architectural walks taking place every Tuesday and Saturday morning.\n\nRegarding the development plans for the civic square: Following our extensive public consultation last autumn, the committee voted to proceed with the proposal to renovate the central auditorium rather than building a commercial annex. The auditorium acoustics will be upgraded to world-class standards while retaining the original Victorian plasterwork.\n\nFunding for this landmark restoration has been secured through a unique multi-stakeholder partnership. While municipal council reserves provided initial feasibility funds, the substantial capital grant of three million pounds was awarded by the national heritage lottery, supplemented by generous sponsorships from local corporate foundations...\n\nPlease take a copy of the site map from the foyer as we explore the four main wings of the restored building..."
                 },
                 {
@@ -3323,7 +3410,7 @@
                   title: "Part 3: Academic Project Review",
                   prompt: "Educational Discussion between Two Students",
                   section_title: "Part 3: Sociology Research Methodology",
-                  audio_url: null,
+                  audio_url: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
                   audio_script: "Jack: Hi Chloe, thanks for meeting up. We really need to finalize our presentation for Dr. Harrison's sociology seminar on Thursday.\nChloe: Absolutely, Jack. I've been reviewing the reviewer comments on our preliminary pilot study. What did you think about their assessment of our methodology?\nJack: Well, the feedback pointed out that our literature review was insufficiently focused on urban communities. We spent too much space reviewing rural studies which didn't match our research questions.\nChloe: I completely agree. We should trim those sections and focus squarely on metropolitan social networks. But what about our primary data collection? The reviewers felt our sample size of twenty participants was too limited to draw statistically valid conclusions.\nJack: That's true, but remember our primary paradigm was qualitative rather than quantitative. We conducted in-depth two-hour focus groups rather than quick online surveys. Still, we should acknowledge that limitation in our methodology slide.\nChloe: Good idea. And for the qualitative coding, how should we present the focus group transcript analysis?\nJack: I suggest we create a thematic matrix comparing the four recurring themes across both age cohorts. It makes the inductive coding clear and visual.\nChloe: Perfect. Let's draft the presentation slides right now..."
                 },
                 {
@@ -3333,7 +3420,7 @@
                   title: "Part 4: Oceanography Lecture",
                   prompt: "Academic Subject Lecture on Marine Ecology",
                   section_title: "Part 4: Ocean Ecosystems and Conservation",
-                  audio_url: null,
+                  audio_url: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
                   audio_script: "Professor Davis: Good morning, class. In today's lecture on marine biological systems, we will examine the physiological adaptations of oceanic fauna and the systemic anthropogenic pressures confronting marine biomes.\n\nTo begin with, marine biological rhythms across coastal and pelagic species are fundamentally governed by the gravitational pull of the moon. This tidal synchrony dictates reproductive spawning cycles, migratory feeding ascents, and intertidal foraging behaviors across hundreds of marine phyla.\n\nMoving deeper into the bathypelagic and abyssopelagic zones, organisms must withstand immense hydrostatic pressure, which increases by one atmosphere every ten meters of depth. Deep-sea organisms adapt to extreme water pressure through modified membrane phospholipids and specialized piezolyte enzymes that prevent cellular collapse.\n\nBioluminescent reactions are exceptionally prevalent at these depths. While early marine biologists hypothesized that light production was primarily defensive, modern submersibles have shown that bioluminescence serves primarily for mate attraction and prey detection in the total absence of sunlight.\n\nTurning now to global environmental pressures: Tropical coral reefs are experiencing mass mortality through coral bleaching, a phenomenon triggered when sea temperatures exceed seasonal thresholds by as little as one to two degrees Celsius for sustained periods.\n\nFurthermore, plastic pollution has reached critical concentrations. Microplastic particles accumulate most densely in oceanic convergence zones—the massive subtropical gyres where ocean currents concentrate floating debris into expansive accumulation zones.\n\nNutrient upwelling currents sustain vast populations of photosynthetic plankton, forming the trophic foundation for global fisheries. However, marine protected areas remain vital: International marine reserves enforce total prohibition of commercial fishing to allow fish stocks and benthic ecosystems to regenerate.\n\nUltimately, the efficacy of future marine conservation will depend upon binding cross-border diplomatic cooperation across all maritime nations..."
                 }
               ]));
